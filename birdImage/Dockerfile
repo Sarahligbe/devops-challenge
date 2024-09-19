@@ -1,7 +1,5 @@
 FROM golang:1.22.5-alpine AS build
 
-RUN addgroup -S birdgroup && adduser -S birduser -G birdgroup
-
 WORKDIR /birdImage
 
 COPY go.mod ./
@@ -12,16 +10,18 @@ COPY *.go ./
 
 RUN go build -o getBirdImage
 
-FROM scratch
+FROM alpine:3.20
 
 WORKDIR /birdImage
 
 # Copy binary from build stage
 COPY --from=build /birdImage/getBirdImage .
 
-# Copy the non-root user
-COPY --from=build /etc/passwd /etc/passwd
+# Create non-root user and change ownership of the binary
+RUN addgroup -S birdgroup && adduser -S birduser -G birdgroup is && chown birduser:birdgroup getBirdImage
 
-EXPOSE 4201
+USER birduser
+
+EXPOSE 4200
 
 ENTRYPOINT ["./getBirdImage"]
