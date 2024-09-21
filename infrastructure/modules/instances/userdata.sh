@@ -11,7 +11,7 @@ log() {
 # Variables
 K8S_VERSION="1.31"
 CALICO_VERSION="v3.28.1"
-POD_NETWORK_CIDR="10.244.0.0/16"
+POD_NETWORK_CIDR="192.168.0.0/16"
 REGION="${region}"
 HOME="/home/ubuntu"
 
@@ -91,7 +91,6 @@ setup_controlplane() {
     /sbin/runuser ubuntu -s /bin/bash -c "
     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/tigera-operator.yaml
     sudo curl https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/custom-resources.yaml -O
-    sudo sed -i 's/cidr: 192\.168\.0\.0\/16/cidr: 10.244.0.0\/16/g' custom-resources.yaml
     kubectl create -f custom-resources.yaml"
 
     log "Generating join command for worker nodes"
