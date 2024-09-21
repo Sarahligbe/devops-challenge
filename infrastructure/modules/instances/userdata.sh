@@ -12,6 +12,7 @@ log() {
 K8S_VERSION="1.31"
 CALICO_VERSION="v3.28.1"
 POD_NETWORK_CIDR="10.244.0.0/16"
+REGION="${region}"
 
 # Determine if this is a controlplane or worker node
 NODE_TYPE="${node_type}"
@@ -98,6 +99,7 @@ setup_controlplane() {
         --name "/k8s/join-command" \
         --type "SecureString" \
         --value "$JOIN_COMMAND" \
+        --region $REGION \
         --overwrite; then
         log "Error: Failed to update SSM parameter with join command"
         return 1
@@ -108,7 +110,8 @@ setup_controlplane() {
         --name "/k8s/join-command" \
         --with-decryption \
         --query "Parameter.Value" \
-        --output text)
+        --output text \
+        --region $REGION)
 
     if [ "$JOIN_COMMAND" != "$VERIFIED_COMMAND" ]; then
         log "Error: SSM parameter verification failed"
@@ -128,7 +131,8 @@ setup_worker() {
             --name "/k8s/join-command" \
             --with-decryption \
             --query "Parameter.Value" \
-            --output text)
+            --output text \
+            --region $REGION)
 
         if [ -n "$JOIN_COMMAND" ] && [ "$JOIN_COMMAND" != "placeholder" ]; then
             log "Join command retrieved successfully"

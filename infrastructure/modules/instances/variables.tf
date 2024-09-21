@@ -3,6 +3,11 @@ variable "cluster_name" {
   type = string
 }
 
+variable "region" {
+  description = "AWS region"
+  type = string
+}
+
 variable "instance_type" {
   description = "Instance type for k8s nodes"
   type = string

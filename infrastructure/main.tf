@@ -26,6 +26,7 @@ module "instances" {
   source = "./modules/instances"
 
   cluster_name       = var.cluster_name
+  region             = var.region
   instance_type      = var.instance_type
   controlplane_count = var.controlplane_count
   worker_count       = var.worker_count

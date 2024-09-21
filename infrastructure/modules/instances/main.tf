@@ -41,7 +41,7 @@ resource "aws_instance" "controlplane" {
   key_name               = data.aws_key_pair.main.key_name
   iam_instance_profile   = var.ssm_profile_name
 
-  user_data = templatefile("${path.module}/userdata.sh", {node_type = "controlplane"})
+  user_data = templatefile("${path.module}/userdata.sh", {node_type = "controlplane", region = "${var.region}"})
 
   tags = {
     Name = "k8s-controlplane-${count.index + 1}"
@@ -57,7 +57,7 @@ resource "aws_instance" "worker" {
   key_name               = data.aws_key_pair.main.key_name
   iam_instance_profile   = var.ssm_profile_name
 
-  user_data = templatefile("${path.module}/userdata.sh", {node_type = "worker"})
+  user_data = templatefile("${path.module}/userdata.sh", {node_type = "worker", region = "${var.region}"})
 
   tags = {
     Name = "k8s-worker-${count.index + 1}"
