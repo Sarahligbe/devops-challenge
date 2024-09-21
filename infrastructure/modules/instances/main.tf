@@ -15,10 +15,8 @@ data "aws_ami" "ubuntu" {
 }
 
 data "aws_key_pair" "main" {
-  key_name           = "var.key_name"
-
   filter {
-    name   = "name"
+    name   = "key-name"
     values = [var.key_name]
   }
 }
