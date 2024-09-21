@@ -50,7 +50,7 @@ resource "aws_internet_gateway" "main" {
 
 #create elatic ip to be attached to nat gateway
 resource "aws_eip" "main" {
-  vpc = true
+  domain = "vpc"
 
   tags = {
     Name = "${var.cluster_name}-eip"

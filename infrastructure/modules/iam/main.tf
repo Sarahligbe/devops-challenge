@@ -40,6 +40,7 @@ resource "aws_iam_role" "k8s_ssm_role" {
 }
 
 resource "aws_iam_policy_attachment" "ssm_attach" {
+  name       = "ssm_attach"
   roles      = [aws_iam_role.k8s_ssm_role.name]
   policy_arn = aws_iam_policy.k8s_ssm_policy.arn
 }
