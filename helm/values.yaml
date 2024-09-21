@@ -1,0 +1,5 @@
+bird:
+  enabled: true
+
+birdimage:
+  enabled: true

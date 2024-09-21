@@ -1,0 +1,40 @@
+replicaCount: 1
+
+image:
+  repository: sarahligbe/birdimage
+  pullPolicy: Always
+  tag: "latest"
+
+nameOverride: ""
+fullnameOverride: "birdimage"
+
+service:
+  type: ClusterIP
+  port: 4200
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 50m
+    memory: 64Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+podSecurityContext:
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
