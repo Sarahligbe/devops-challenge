@@ -1,4 +1,4 @@
-variable "aws_region" {
+variable "region" {
   description = "AWS region to deploy resources"
   type        = string
   default     = "eu-west-1"
@@ -36,4 +36,16 @@ variable "instance_type" {
 variable "key_name" {
   description = "Name of the SSH key pair for EC2 instances"
   type        = string
+}
+
+variable "controlplane_count" {
+  description = "Number of controlplane nodes to provision"
+  type        = string
+  default     = 1
+}
+
+variable "worker_count" {
+  description = "Number of worker nodes to provision"
+  type        = string
+  default     = 1
 }

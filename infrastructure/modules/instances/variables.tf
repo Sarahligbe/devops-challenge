@@ -40,3 +40,8 @@ variable "worker_count" {
   type        = number
   default     = 1
 }
+
+variable "ssm_profile_name" {
+  description = "ssm iam instance profile name"
+  type        = string
+}
