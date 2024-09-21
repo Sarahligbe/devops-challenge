@@ -90,7 +90,7 @@ setup_controlplane() {
     log "Installing Calico network plugin"
     /sbin/runuser ubuntu -s /bin/bash -c "
     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/tigera-operator.yaml
-    curl https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/custom-resources.yaml -O
+    sudo curl https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/custom-resources.yaml -O
     sed -i 's/cidr: 192\.168\.0\.0\/16/cidr: 10.244.0.0\/16/g' custom-resources.yaml
     kubectl create -f custom-resources.yaml"
 
