@@ -96,6 +96,16 @@ resource "aws_vpc_security_group_ingress_rule" "controlplane_ing4" {
   to_port     = 2380
 }
 
+resource "aws_vpc_security_group_ingress_rule" "controlplane_ing5" {
+  security_group_id = aws_security_group.k8s_controlplane_node.id
+  description = "Connection via ec2 instance connect endpoint"
+
+  referenced_security_group_id = aws_security_group.instance_connect_endpoint.id
+  from_port   = 22
+  ip_protocol = "tcp"
+  to_port     = 22
+}
+
 resource "aws_vpc_security_group_egress_rule" "controlplane_eg" {
   security_group_id = aws_security_group.k8s_controlplane_node.id
 
