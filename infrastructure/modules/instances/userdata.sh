@@ -32,7 +32,7 @@ setup_common() {
     cat <<EOF | sudo tee /etc/modules-load.d/k8s.conf
     overlay
     br_netfilter
-    EOF
+EOF
     sudo modprobe overlay
     sudo modprobe br_netfilter
 
@@ -41,7 +41,7 @@ setup_common() {
     net.bridge.bridge-nf-call-iptables  = 1
     net.bridge.bridge-nf-call-ip6tables = 1
     net.ipv4.ip_forward                 = 1
-    EOF
+EOF
     sudo sysctl --system
 
     log "Installing containerd"
