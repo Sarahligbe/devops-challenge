@@ -12,9 +12,7 @@ resource "aws_iam_policy" "k8s_ssm_policy" {
           "ssm:GetParameter",
         ]
         Effect   = "Allow"
-        Resource = [
-
-        "var.k8s_join_command_arn" ]
+        Resource = var.k8s_join_command_arn
       },
     ]
   })
