@@ -115,7 +115,7 @@ resource "aws_route_table_association" "private" {
 
 #Create ec2 instance connect endpoint to access the instances in the private subnet_id
 resource "aws_ec2_instance_connect_endpoint" "main" {
-  subnet_id          = aws_subnet.private[1 % length(var.private_subnet_count)].id
+  subnet_id          = aws_subnet.private[1 % var.private_subnet_count].id
   security_group_ids = [var.eice_sg_id]
   preserve_client_ip = false
 

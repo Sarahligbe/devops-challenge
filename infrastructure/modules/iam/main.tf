@@ -1,6 +1,6 @@
 #Create an IAM Policy
 resource "aws_iam_policy" "k8s_ssm_policy" {
-  name        = "K8s ssm"
+  name        = "node_ssm"
   description = "Provides permission to put and get parameters in the ssm parameter store"
 
   policy = jsonencode({
@@ -40,12 +40,11 @@ resource "aws_iam_role" "k8s_ssm_role" {
 }
 
 resource "aws_iam_policy_attachment" "ssm_attach" {
-  name       = "policy attachment for the ssm role"
   roles      = [aws_iam_role.k8s_ssm_role.name]
   policy_arn = aws_iam_policy.k8s_ssm_policy.arn
 }
 
 resource "aws_iam_instance_profile" "ssm_profile" {
-  name = "instance profile for ssm"
+  name = "ssm_profile"
   role = aws_iam_role.k8s_ssm_role.name
 }
