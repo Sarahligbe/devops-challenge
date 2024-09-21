@@ -1,15 +1,15 @@
 module "networking" {
-  source = "./networking"
+  source = "./modules/networking"
 
   cluster_name           = var.cluster_name
   vpc_cidr_block         = var.vpc_cidr_block
-  private_subnet_blocks  = var.private_subnet_blocks
-  public_subnet_blocks   = var.public_subnet_blocks
+  private_subnet_count   = var.private_subnet_count
+  public_subnet_count    = var.public_subnet_count
   eice_sg_id             = module.security_groups.eice_sg_id
 }
 
 module "security_groups" {
-  source = "./security_groups"
+  source = "./modules/security_groups"
 
   cluster_name    = var.cluster_name
   vpc_id          = module.networking.vpc_id
@@ -17,16 +17,18 @@ module "security_groups" {
 }
 
 module "iam" {
-  source = "./iam"
+  source = "./modules/iam"
 
   k8s_join_command_arn = module.instances.k8s_join_command_arn
 }
 
 module "instances" {
-  source = "./instances"
+  source = "./modules/instances"
 
   cluster_name       = var.cluster_name
   instance_type      = var.instance_type
+  controlplane_count = var.controlplane_count
+  worker_count       = var.worker_count
   private_subnet_ids = module.networking.private_subnet_ids
   controlplane_sg_id = module.security_groups.controlplane_sg_id
   worker_sg_id       = module.security_groups.worker_sg_id

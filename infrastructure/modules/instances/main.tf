@@ -18,25 +18,6 @@ data "aws_key_pair" "main" {
   key_name           = "var.key_name"
 }
 
-locals {
-  node_configs = {
-    controlplane = {
-      count        = 1
-      name         = "k8s_controlplane"
-      subnet_index = 0
-      sg_id        = var.controlplane_sg_id
-      node_type    = "controlplane"
-    },
-    worker = {
-      count        = 1  # or more if you want multiple workers
-      name         = "k8s_worker"
-      subnet_index = 1
-      sg_id        = var.worker_sg_id
-      node_type    = "worker"
-    }
-  }
-}
-
 resource "aws_ssm_parameter" "k8s_join_command" {
   name        = "/k8s/join-command"
   description = "Kubernetes cluster join command"
@@ -48,25 +29,36 @@ resource "aws_ssm_parameter" "k8s_join_command" {
   }
 }
 
-resource "aws_instance" "k8s_nodes" {
-  for_each = local.node_configs
-
+resource "aws_instance" "controlplane" {
+  count                  = var.controlplane_count
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
-  subnet_id              = var.private_subnet_ids[each.value.subnet_index]
-  vpc_security_group_ids = [each.value.sg_id]
-  key_name               = data.aws_key_pair.main.key_name
+  subnet_id              = var.private_subnet_ids[count.index % length(var.private_subnet_ids)]
+  vpc_security_group_ids = [var.controlplane_sg_id]
+  key_name               = var.key_name
   iam_instance_profile   = var.ssm_profile_name
 
-  user_data = templatefile("${path.module}/userdata.sh", { 
-    node_type = each.value.node_type 
-  })
+  user_data = templatefile("${path.module}/userdata.sh", {node_type = "controlplane"})
 
   tags = {
-    Name = each.value.name
+    Name = "k8s-controlplane-${count.index + 1}"
+  }
+}
+
+resource "aws_instance" "worker" {
+  count                  = var.worker_count
+  ami                    = data.aws_ami.ubuntu.id
+  instance_type          = var.instance_type
+  subnet_id              = var.private_subnet_ids[(count.index + 1) % length(var.private_subnet_ids)] 
+  vpc_security_group_ids = [var.worker_sg_id]
+  key_name               = var.key_name
+  iam_instance_profile   = var.ssm_profile_name
+
+  user_data = templatefile("${path.module}/userdata.sh", {node_type = "worker"})
+
+  tags = {
+    Name = "k8s-worker-${count.index + 1}"
   }
 
-  count = each.value.count
-
-  depends_on = [aws_ssm_parameter.k8s_join_command]
+  depends_on = [aws_instance.controlplane]
 }

@@ -4,24 +4,21 @@ variable "cluster_name" {
 }
 
 variable "vpc_cidr_block" {
-  description = "VPC CIDR block"
-  type = string
+  description = "CIDR block for the VPC"
+  type        = string
+  default     = "172.19.0.0/16"
 }
 
-variable "private_subnet_blocks" {
-  description = "cidr, availability zone for private subnets"
-  type = map(object({
-    cidr = string
-    az = string
-  }))
+variable "private_subnet_count" {
+  description = "Number of private subnets to create"
+  type        = number
+  default     = 2
 }
 
-variable "public_subnet_blocks" {
-  description = "cidr, availability zone for public subnets"
-  type = map(object({
-    cidr = string
-    az = string
-  }))
+variable "public_subnet_count" {
+  description = "Number of public subnets to create"
+  type        = number
+  default     = 2
 }
 
 variable "eice_sg_id" {

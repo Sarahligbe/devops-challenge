@@ -10,8 +10,8 @@ variable "instance_type" {
 }
 
 variable "private_subnet_ids" {
-  description = "Contains a map of the ids of the private subnets"
-  type = map(object)
+  description = "Contains a list of the ids of the private subnets"
+  type = list
 }
 
 variable "controlplane_sg_id" {
@@ -27,4 +27,16 @@ variable "worker_sg_id" {
 variable "key_name" {
   description = "SSH key for access to the nodes"
   type = string
+}
+
+variable "controlplane_count" {
+  description = "Number of control plane nodes"
+  type        = number
+  default     = 1
+}
+
+variable "worker_count" {
+  description = "Number of worker nodes"
+  type        = number
+  default     = 1
 }
