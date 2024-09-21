@@ -43,9 +43,7 @@ resource "aws_vpc_security_group_egress_rule" "worker_eg" {
   security_group_id = aws_security_group.k8s_worker_node.id
 
   cidr_ipv4   = "0.0.0.0/0"
-  from_port   = 0
   ip_protocol = "-1"
-  to_port     = 0
 }
 
 resource "aws_security_group" "k8s_controlplane_node" {
@@ -102,9 +100,7 @@ resource "aws_vpc_security_group_egress_rule" "controlplane_eg" {
   security_group_id = aws_security_group.k8s_controlplane_node.id
 
   cidr_ipv4   = "0.0.0.0/0"
-  from_port   = 0
   ip_protocol = "-1"
-  to_port     = 0
 }
 
 resource "aws_security_group" "instance_connect_endpoint" {
