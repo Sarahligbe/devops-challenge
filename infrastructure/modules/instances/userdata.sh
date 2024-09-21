@@ -91,7 +91,7 @@ setup_controlplane() {
     /sbin/runuser ubuntu -s /bin/bash -c "
     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/tigera-operator.yaml
     sudo curl https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/custom-resources.yaml -O
-    sed -i 's/cidr: 192\.168\.0\.0\/16/cidr: 10.244.0.0\/16/g' custom-resources.yaml
+    sudo sed -i 's/cidr: 192\.168\.0\.0\/16/cidr: 10.244.0.0\/16/g' custom-resources.yaml
     kubectl create -f custom-resources.yaml"
 
     log "Generating join command for worker nodes"
