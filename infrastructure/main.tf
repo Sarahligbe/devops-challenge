@@ -35,4 +35,6 @@ module "instances" {
   worker_sg_id       = module.security_groups.worker_sg_id
   key_name           = var.key_name #provide the key name of an existing ssh key you own
   ssm_profile_name   = module.iam.ssm_profile_name
+
+  depends_on         = [module.networking]
 }
