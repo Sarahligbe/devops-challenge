@@ -16,6 +16,11 @@ data "aws_ami" "ubuntu" {
 
 data "aws_key_pair" "main" {
   key_name           = "var.key_name"
+
+  filter {
+    name   = "KeyName"
+    values = [var.key_name]
+  }
 }
 
 resource "aws_ssm_parameter" "k8s_join_command" {
@@ -51,7 +56,7 @@ resource "aws_instance" "worker" {
   instance_type          = var.instance_type
   subnet_id              = var.private_subnet_ids[(count.index + 1) % length(var.private_subnet_ids)] 
   vpc_security_group_ids = [var.worker_sg_id]
-  key_name               = data.aws_key_pair.main.key_name
+  key_name               = var.key_name
   iam_instance_profile   = var.ssm_profile_name
 
   user_data = templatefile("${path.module}/userdata.sh", {node_type = "worker"})
