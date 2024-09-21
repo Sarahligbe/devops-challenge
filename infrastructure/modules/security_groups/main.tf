@@ -15,7 +15,7 @@ resource "aws_vpc_security_group_ingress_rule" "worker_ing1" {
 
   cidr_ipv4   = var.vpc_cidr_block
   from_port   = 10248
-  ip_protocol = "-1"
+  ip_protocol = "tcp"
   to_port     = 10260
 }
 
@@ -25,7 +25,7 @@ resource "aws_vpc_security_group_ingress_rule" "worker_ing2" {
 
   cidr_ipv4   = var.vpc_cidr_block
   from_port   = 30000
-  ip_protocol = "-1"
+  ip_protocol = "tcp"
   to_port     = 32767
 }
 
@@ -74,7 +74,7 @@ resource "aws_vpc_security_group_ingress_rule" "controlplane_ing2" {
 
   cidr_ipv4   = var.vpc_cidr_block
   from_port   = 10248
-  ip_protocol = "-1"
+  ip_protocol = "tcp"
   to_port     = 10260
 }
 
@@ -84,7 +84,7 @@ resource "aws_vpc_security_group_ingress_rule" "controlplane_ing3" {
 
   cidr_ipv4   = var.vpc_cidr_block
   from_port   = 30000
-  ip_protocol = "-1"
+  ip_protocol = "tcp"
   to_port     = 32767
 }
 
@@ -94,7 +94,7 @@ resource "aws_vpc_security_group_ingress_rule" "controlplane_ing4" {
 
   cidr_ipv4   = var.vpc_cidr_block
   from_port   = 2379
-  ip_protocol = "-1"
+  ip_protocol = "tcp"
   to_port     = 2380
 }
 
