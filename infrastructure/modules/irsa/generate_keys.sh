@@ -60,7 +60,7 @@ ssh-keygen -e -m PKCS8 -f "$PUB_KEY" > "$PKCS_KEY"
 
 # Run the Go script to generate JWKS
 echo "Generating JWKS key set..."
-curl -O $KEYS_DIR/main.go "$GO_FILE"
+curl -o "$KEYS_DIR/main.go" "$GO_FILE"
 if go run -C "$KEYS_DIR" main.go -key "$PKCS_KEY" | jq > "$KEYS_FILE"; then
     echo "JWKS key set generated successfully at $KEYS_FILE"
 else
