@@ -52,21 +52,16 @@ mkdir -p "$KEYS_DIR"
 
 # Generate the RSA key pair
 echo "Generating RSA key pair..."
-ssh-keygen -t rsa -b 2048 -f $PRIV_KEY -m pem
+ssh-keygen -t rsa -b 2048 -f "$PRIV_KEY" -m pem -N ""
 
 # Convert the SSH pubkey to PKCS8
 echo "Converting public key to PKCS8 format..."
 ssh-keygen -e -m PKCS8 -f "$PUB_KEY" > "$PKCS_KEY"
 
-# Ensure the keys-generator directory exists
-if [ ! -d "$KEYS_GENERATOR_DIR" ]; then
-    echo "Error: keys-generator directory not found at $KEYS_GENERATOR_DIR"
-    exit 1
-fi
-
 # Run the Go script to generate JWKS
 echo "Generating JWKS key set..."
-if go run -C "$KEYS_GENERATOR_DIR" "$GO_FILE" -key "$PKCS_KEY" | jq > "$KEYS_FILE"; then
+curl -O $KEYS_DIR/main.go "$GO_FILE"
+if go run -C "$KEYS_DIR" main.go -key "$PKCS_KEY" | jq > "$KEYS_FILE"; then
     echo "JWKS key set generated successfully at $KEYS_FILE"
 else
     echo "Error generating JWKS key set"
