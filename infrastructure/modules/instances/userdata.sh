@@ -82,13 +82,10 @@ setup_controlplane() {
     sudo kubeadm config images pull
     sudo kubeadm init --pod-network-cidr=$POD_NETWORK_CIDR
 
-    log "Configuring kubectl for the current user"
-    mkdir -p $HOME/.kube
-    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-    sudo chown $(id -u):$(id -g) $HOME/.kube/config
+    log "Exporting kubeconfig"
+    export KUBECONFIG=/etc/kubernetes/admin.conf
 
     log "Installing Calico network plugin"
-#    /sbin/runuser ubuntu -s /bin/bash -c "
     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/tigera-operator.yaml
     curl https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/custom-resources.yaml -O
     kubectl create -f custom-resources.yaml
@@ -121,6 +118,12 @@ setup_controlplane() {
     fi
 
     log "Join command stored in Parameter Store"
+
+    log "Configuring kubectl for the ubuntu user"
+    /sbin/runuser ubuntu -s /bin/bash -c "
+    mkdir -p $HOME/.kube
+    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config"
 }
 
 setup_worker() {
