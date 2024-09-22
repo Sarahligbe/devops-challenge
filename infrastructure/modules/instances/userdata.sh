@@ -123,7 +123,7 @@ setup_controlplane() {
     /sbin/runuser ubuntu -s /bin/bash -c "
     mkdir -p $HOME/.kube
     sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-    sudo chown $(id -u):$(id -g) $HOME/.kube/config"
+    sudo chown ubuntu:ubuntu $HOME/.kube/config"
 }
 
 setup_worker() {
