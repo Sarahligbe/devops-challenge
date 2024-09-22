@@ -218,9 +218,26 @@ setup_common
 
 
 if [ "$NODE_TYPE" == "controlplane" ]; then
-    /sbin/runuser ubuntu -c "$(declare -f log setup_controlplane); setup_controlplane"
+    /sbin/runuser -l ubuntu << EOF
+export REGION="$REGION"
+export DISCOVERY_BUCKET="$DISCOVERY_BUCKET"
+export IRSA_DIR="$IRSA_DIR"
+export PKCS_KEY="$PKCS_KEY"
+export PRIV_KEY="$PRIV_KEY"
+export ISSUER_HOSTPATH="$ISSUER_HOSTPATH"
+export K8S_VERSION="$K8S_VERSION"
+export CALICO_VERSION="$CALICO_VERSION"
+export POD_NETWORK_CIDR="$POD_NETWORK_CIDR"
+$(declare -f log setup_controlplane)
+setup_controlplane
+EOF
 elif [ "$NODE_TYPE" == "worker" ]; then
-    /sbin/runuser ubuntu -c "$(declare -f log setup_worker); setup_worker"
+    /sbin/runuser -l ubuntu << EOF
+export REGION="$REGION"
+export K8S_VERSION="$K8S_VERSION"
+$(declare -f log setup_worker)
+setup_worker
+EOF
 else
     log "Error: Invalid node type specified. Must be 'controlplane' or 'worker'"
     exit 1
