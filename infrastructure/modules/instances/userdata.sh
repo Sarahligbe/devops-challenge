@@ -10,7 +10,7 @@ log() {
 
 # Variables
 K8S_VERSION="1.31"
-CALICO_VERSION="v3.28.1"
+CALICO_VERSION="v3.28.2"
 POD_NETWORK_CIDR="192.168.0.0/16"
 REGION="${region}"
 HOME="/home/ubuntu"
@@ -86,9 +86,8 @@ setup_controlplane() {
     export KUBECONFIG=/etc/kubernetes/admin.conf
 
     log "Installing Calico network plugin"
-    kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/tigera-operator.yaml
-    curl https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/custom-resources.yaml -O
-    kubectl create -f custom-resources.yaml
+    kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/calico.yaml
+    kubectl set env daemonset/calico-node -n calico-system ICALICO_IPV4POOL_IPIP=CrossSubnet
 
     log "Generating join command for worker nodes"
     JOIN_COMMAND=$(kubeadm token create --print-join-command)
