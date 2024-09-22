@@ -216,13 +216,18 @@ setup_worker() {
 # Main execution
 setup_common
 
+
 if [ "$NODE_TYPE" == "controlplane" ]; then
-    /sbin/runuser -l ubuntu -c "$(declare -f log setup_controlplane); setup_controlplane"
+    /sbin/runuser -l ubuntu << EOF
+$(declare -f log setup_controlplane)
+setup_controlplane
+EOF
 elif [ "$NODE_TYPE" == "worker" ]; then
-    /sbin/runuser -l ubuntu -c "$(declare -f log setup_worker); setup_worker"
+    /sbin/runuser -l ubuntu << EOF
+$(declare -f log setup_worker)
+setup_worker
+EOF
 else
-    log "Error: Invalid node type specified. Must be 'controlplane' or 'worker'."
+    log "Error: Invalid node type specified. Must be 'controlplane' or 'worker'"
     exit 1
 fi
-
-log "Kubernetes $NODE_TYPE node setup completed"
