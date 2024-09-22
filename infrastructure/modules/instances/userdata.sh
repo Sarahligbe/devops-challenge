@@ -84,7 +84,7 @@ EOF
 
 setup_controlplane() {
     log "Creating a directory for the IRSA bucket"
-    mkdir -p $IRSA_DIR
+    sudo mkdir -p $IRSA_DIR
 
     log "Retrieving IRSA keys from s3 bucket"
     aws s3 cp s3://$DISCOVERY_BUCKET/keys/oidc-issuer.pub $PKCS_KEY
@@ -95,8 +95,8 @@ setup_controlplane() {
     sudo chmod 600 $PKCS_KEY $PRIV_KEY
 
     log "Creating kubeconfig file"
-    cat <<-EOT > kubeadm-config.yaml
-    apiVersion: kubeadm.k8s.io/v1beta3
+    cat <<EOF > kubeadm-config.yaml
+    apiVersion: kubeadm.k8s.io/v1beta4
     kind: ClusterConfiguration
     apiServer:
       extraArgs:
@@ -112,7 +112,7 @@ setup_controlplane() {
           pathType: DirectoryOrCreate
     networking:
       podSubnet: 192.168.0.0/16
-EOT
+EOF
     
     log "Initializing Kubernetes controlplane node"
     sudo kubeadm init --config kubeadm-config.yaml
@@ -218,15 +218,9 @@ setup_common
 
 
 if [ "$NODE_TYPE" == "controlplane" ]; then
-    /sbin/runuser -l ubuntu << EOF
-$(declare -f log setup_controlplane)
-setup_controlplane
-EOF
+    /sbin/runuser ubuntu -c "$(declare -f log setup_controlplane); setup_controlplane"
 elif [ "$NODE_TYPE" == "worker" ]; then
-    /sbin/runuser -l ubuntu << EOF
-$(declare -f log setup_worker)
-setup_worker
-EOF
+    /sbin/runuser ubuntu -c "$(declare -f log setup_worker); setup_worker"
 else
     log "Error: Invalid node type specified. Must be 'controlplane' or 'worker'"
     exit 1
