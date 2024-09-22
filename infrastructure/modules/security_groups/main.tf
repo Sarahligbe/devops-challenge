@@ -39,6 +39,16 @@ resource "aws_vpc_security_group_ingress_rule" "worker_ing3" {
   to_port     = 22
 }
 
+resource "aws_vpc_security_group_ingress_rule" "worker_ing4" {
+  security_group_id = aws_security_group.k8s_worker_node.id
+  description = "BGP peering for calico"
+
+  cidr_ipv4   = var.vpc_cidr_block
+  from_port   = 179
+  ip_protocol = "tcp"
+  to_port     = 179
+}
+
 resource "aws_vpc_security_group_egress_rule" "worker_eg" {
   security_group_id = aws_security_group.k8s_worker_node.id
 
@@ -104,6 +114,16 @@ resource "aws_vpc_security_group_ingress_rule" "controlplane_ing5" {
   from_port   = 22
   ip_protocol = "tcp"
   to_port     = 22
+}
+
+resource "aws_vpc_security_group_ingress_rule" "controlplaner_ing4" {
+  security_group_id = aws_security_group.k8s_controlplaner_node.id
+  description = "BGP peering for calico"
+
+  cidr_ipv4   = var.vpc_cidr_block
+  from_port   = 179
+  ip_protocol = "tcp"
+  to_port     = 179
 }
 
 resource "aws_vpc_security_group_egress_rule" "controlplane_eg" {
