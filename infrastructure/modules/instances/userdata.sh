@@ -13,7 +13,7 @@ K8S_VERSION="1.31"
 CALICO_VERSION="v3.28.1"
 POD_NETWORK_CIDR="192.168.0.0/16"
 REGION="${region}"
-#HOME="/root"
+HOME="/root"
 
 # Determine if this is a controlplane or worker node
 NODE_TYPE="${node_type}"
