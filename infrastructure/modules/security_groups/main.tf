@@ -116,7 +116,7 @@ resource "aws_vpc_security_group_ingress_rule" "controlplane_ing5" {
   to_port     = 22
 }
 
-resource "aws_vpc_security_group_ingress_rule" "controlplane_ing4" {
+resource "aws_vpc_security_group_ingress_rule" "controlplane_ing6" {
   security_group_id = aws_security_group.k8s_controlplane_node.id
   description = "BGP peering for calico"
 
