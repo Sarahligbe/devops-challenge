@@ -87,7 +87,7 @@ setup_controlplane() {
 
     log "Installing Calico network plugin"
     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/calico.yaml
-    kubectl set env daemonset/calico-node -n calico-system ICALICO_IPV4POOL_IPIP=CrossSubnet
+    kubectl set env daemonset/calico-node -n kube-system ICALICO_IPV4POOL_IPIP=CrossSubnet
 
     log "Generating join command for worker nodes"
     JOIN_COMMAND=$(kubeadm token create --print-join-command)
