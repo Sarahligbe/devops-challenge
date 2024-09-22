@@ -50,3 +50,8 @@ variable "ssm_profile_name" {
   description = "ssm iam instance profile name"
   type        = string
 }
+
+variable "discovery_bucket_name" {
+  description = "Name of s3 bucket were the IRSA keys are stored"
+  type        = string
+}

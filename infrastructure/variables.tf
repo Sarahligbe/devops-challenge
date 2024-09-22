@@ -49,3 +49,9 @@ variable "worker_count" {
   type        = string
   default     = 1
 }
+
+variable "s3_suffix" {
+  description = "Suffix for s3 bucket for oidc"
+  type = string
+  default = "self-managed"
+}

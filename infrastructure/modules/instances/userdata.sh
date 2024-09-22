@@ -14,7 +14,12 @@ CALICO_VERSION="v3.28.2"
 POD_NETWORK_CIDR="192.168.0.0/16"
 REGION="${region}"
 HOME="/home/ubuntu"
-
+# Set variables for IRSA configuration
+DISCOVERY_BUCKET="${discovery_bucket_name}" 
+IRSA_DIR="/etc/kubernetes/irsa"
+PKCS_KEY="${IRSA_DIR}/oidc-issuer.pub"
+PRIV_KEY="${IRSA_DIR}/oidc-issuer.key"
+ISSUER_HOSTPATH="s3-${region}.amazonaws.com/${discovery_bucket_name}"
 # Determine if this is a controlplane or worker node
 NODE_TYPE="${node_type}"
 
@@ -78,12 +83,44 @@ EOF
 }
 
 setup_controlplane() {
-    log "Initializing Kubernetes controlplane node"
-    sudo kubeadm config images pull
-    sudo kubeadm init --pod-network-cidr=$POD_NETWORK_CIDR
+    log "Creating a directory for the IRSA bucket"
+    mkdir -p ${IRSA_DIR}
 
-    log "Exporting kubeconfig"
-    export KUBECONFIG=/etc/kubernetes/admin.conf
+    log "Retrieving IRSA keys from s3 bucket"
+    aws s3 cp s3://${DISCOVERY_BUCKET}/keys/oidc-issuer.pub ${PKCS_KEY}
+    aws s3 cp s3://${DISCOVERY_BUCKET}/keys/oidc-issuer.key ${PRIV_KEY}
+
+    log "Setting strict permissions on the directory and files"
+    sudo chmod 700 ${IRSA_DIR}
+    sudo chmod 600 ${PKCS_KEY} ${PRIV_KEY}
+
+    log "Creating kubeconfig file"
+    cat <<EOF > kubeadm-config.yaml
+    apiVersion: kubeadm.k8s.io/v1beta3
+    kind: ClusterConfiguration
+    apiServer:
+      extraArgs:
+        service-account-key-file: /etc/kubernetes/irsa/oidc-issuer.pub
+        service-account-signing-key-file: /etc/kubernetes/irsa/oidc-issuer.key
+        api-audiences: "sts.amazonaws.com"
+        service-account-issuer: "https://${ISSUER_HOSTPATH}"
+      extraVolumes:
+        - name: irsa-keys
+          hostPath: "$(pwd)/${IRSA_DIR}"
+          mountPath: /etc/kubernetes/irsa
+          readOnly: true
+          pathType: DirectoryOrCreate
+    networking:
+      podSubnet: 192.168.0.0/16
+EOF
+    
+    log "Initializing Kubernetes controlplane node"
+    sudo kubeadm init --config kubeadm-config.yaml
+
+    log "set up kubeconfig"
+    mkdir -p $HOME/.kube
+    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+    sudo chown ubuntu:ubuntu $HOME/.kube/config"
 
     log "Installing Calico network plugin"
     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/calico.yaml
@@ -118,11 +155,24 @@ setup_controlplane() {
 
     log "Join command stored in Parameter Store"
 
-    log "Configuring kubectl for the ubuntu user"
-    /sbin/runuser ubuntu -s /bin/bash -c "
-    mkdir -p $HOME/.kube
-    sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-    sudo chown ubuntu:ubuntu $HOME/.kube/config"
+    log "Installing cert manager CRDs"
+    kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.crds.yaml
+
+    log "Adding cert manager helm repo"
+    helm repo add cert-manager https://charts.jetstack.io
+
+    log "Installing cert-manager helm chart"
+    helm install certs cert-manager/cert-manager --version 1.15.3 --namespace cert-manager --create-namespace
+
+    sleep 60s
+
+    log "cert-manager is ready. Installing aws-pod-identity-webhook"
+    kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/auth.yaml
+    kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/service.yaml
+    kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/mutatingwebhook.yaml
+    kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/deployment-base.yaml
+
+    log "aws-pod-identity-webhook installation completed"
 }
 
 setup_worker() {
@@ -167,9 +217,9 @@ setup_worker() {
 setup_common
 
 if [ "$NODE_TYPE" == "controlplane" ]; then
-    setup_controlplane
+    /sbin/runuser -l ubuntu -c "$(declare -f log setup_controlplane); setup_controlplane"
 elif [ "$NODE_TYPE" == "worker" ]; then
-    setup_worker
+    /sbin/runuser -l ubuntu -c "$(declare -f log setup_worker); setup_worker"
 else
     log "Error: Invalid node type specified. Must be 'controlplane' or 'worker'."
     exit 1

@@ -42,7 +42,7 @@ resource "aws_instance" "controlplane" {
   source_dest_check      = false
   iam_instance_profile   = var.ssm_profile_name
 
-  user_data = templatefile("${path.module}/userdata.sh", {node_type = "controlplane", region = "${var.region}"})
+  user_data = templatefile("${path.module}/userdata.sh", {node_type = "controlplane", region = "${var.region}", discovery_bucket_name = "${var.discovery_bucket_name}"})
 
   tags = {
     Name = "k8s-controlplane-${count.index + 1}"
@@ -59,7 +59,7 @@ resource "aws_instance" "worker" {
   source_dest_check      = false
   iam_instance_profile   = var.ssm_profile_name
 
-  user_data = templatefile("${path.module}/userdata.sh", {node_type = "worker", region = "${var.region}"})
+  user_data = templatefile("${path.module}/userdata.sh", {node_type = "worker", region = "${var.region}", discovery_bucket_name = "${var.discovery_bucket_name}"})
 
   tags = {
     Name = "k8s-worker-${count.index + 1}"

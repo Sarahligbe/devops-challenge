@@ -22,6 +22,13 @@ module "iam" {
   k8s_join_command_arn = module.instances.k8s_join_command_arn
 }
 
+module "irsa" {
+  source = "./modules/irsa"
+
+  region = var.region
+  s3_suffix = var.s3_suffix
+}
+
 module "instances" {
   source = "./modules/instances"
 
@@ -35,6 +42,7 @@ module "instances" {
   worker_sg_id       = module.security_groups.worker_sg_id
   key_name           = var.key_name #provide the key name of an existing ssh key you own
   ssm_profile_name   = module.iam.ssm_profile_name
+  discovery_bucket_name = module.irsa.discovery_bucket_name
 
-  depends_on         = [module.networking]
+  depends_on         = [module.networking, module.irsa]
 }

@@ -1,9 +1,11 @@
 replicaCount: 1
 
+namespace: birdapp
+
 image:
-  repository: sarahligbe/bird
+  repository: sayligbe/bird
   pullPolicy: Always
-  tag: "latest"
+  tag: "v1.0.0"
 
 nameOverride: ""
 fullnameOverride: ""

@@ -1,3 +1,6 @@
+global:
+  namespace: birdapp
+
 bird:
   enabled: true
 
