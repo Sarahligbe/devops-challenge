@@ -1,25 +1,3 @@
-data "aws_iam_policy_document" "discovery_bucket_policy" {
-  statement {
-    sid = "AllowPublicRead"
-
-    effect  = "Allow"
-
-    principals {
-      type        = "AWS"
-      identifiers = ["*"]
-    }
-
-    actions = [
-      "s3:GetObject"
-    ]
-
-    resources = [
-      aws_s3_bucket.discovery_bucket.arn,
-      "${aws_s3_bucket.discovery_bucket.arn}/*",
-    ]
-  }
-}
-
 resource "aws_s3_bucket" "discovery_bucket" {
   bucket = "aws-irsa-oidc-discovery-${var.s3_suffix}"
 }
@@ -35,12 +13,28 @@ resource "aws_s3_bucket_public_access_block" "discovery_bucket" {
 
 resource "aws_s3_bucket_policy" "readonly_policy" {
   bucket = aws_s3_bucket.discovery_bucket.id
-  policy = data.aws_iam_policy_document.discovery_bucket_policy.json
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowPublicRead"
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "s3:GetObject"
+        Resource = [
+          aws_s3_bucket.discovery_bucket.arn,
+          "${aws_s3_bucket.discovery_bucket.arn}/*",
+        ]
+      },
+    ]
+  })
+
+  depends_on = [aws_s3_bucket_public_access_block.discovery_bucket]
 }
 
 resource "null_resource" "generate_keys" {
   provisioner "local-exec" {
-    command = "${path.module}/generate_keys.sh"
+    command = "bash ${path.module}/generate_keys.sh"
   }
 }
 
