@@ -13,7 +13,7 @@ K8S_VERSION="1.31"
 CALICO_VERSION="v3.28.1"
 POD_NETWORK_CIDR="192.168.0.0/16"
 REGION="${region}"
-HOME="/home/ubuntu"
+#HOME="/root"
 
 # Determine if this is a controlplane or worker node
 NODE_TYPE="${node_type}"
@@ -85,13 +85,13 @@ setup_controlplane() {
     log "Configuring kubectl for the current user"
     mkdir -p $HOME/.kube
     sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-    sudo chown ubuntu:ubuntu $HOME/.kube/config
+    sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
     log "Installing Calico network plugin"
-    /sbin/runuser ubuntu -s /bin/bash -c "
+#    /sbin/runuser ubuntu -s /bin/bash -c "
     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/tigera-operator.yaml
-    sudo curl https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/custom-resources.yaml -O
-    kubectl create -f custom-resources.yaml"
+    curl https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/custom-resources.yaml -O
+    kubectl create -f custom-resources.yaml
 
     log "Generating join command for worker nodes"
     JOIN_COMMAND=$(kubeadm token create --print-join-command)
