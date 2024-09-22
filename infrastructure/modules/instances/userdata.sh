@@ -17,8 +17,8 @@ HOME="/home/ubuntu"
 # Set variables for IRSA configuration
 DISCOVERY_BUCKET="${discovery_bucket_name}" 
 IRSA_DIR="/etc/kubernetes/irsa"
-PKCS_KEY="${IRSA_DIR}/oidc-issuer.pub"
-PRIV_KEY="${IRSA_DIR}/oidc-issuer.key"
+PKCS_KEY="$IRSA_DIR/oidc-issuer.pub"
+PRIV_KEY="$IRSA_DIR/oidc-issuer.key"
 ISSUER_HOSTPATH="s3-${region}.amazonaws.com/${discovery_bucket_name}"
 # Determine if this is a controlplane or worker node
 NODE_TYPE="${node_type}"
@@ -84,15 +84,15 @@ EOF
 
 setup_controlplane() {
     log "Creating a directory for the IRSA bucket"
-    mkdir -p ${IRSA_DIR}
+    mkdir -p $IRSA_DIR
 
     log "Retrieving IRSA keys from s3 bucket"
-    aws s3 cp s3://${DISCOVERY_BUCKET}/keys/oidc-issuer.pub ${PKCS_KEY}
-    aws s3 cp s3://${DISCOVERY_BUCKET}/keys/oidc-issuer.key ${PRIV_KEY}
+    aws s3 cp s3://$DISCOVERY_BUCKET/keys/oidc-issuer.pub $PKCS_KEY
+    aws s3 cp s3://$DISCOVERY_BUCKET/keys/oidc-issuer.key $PRIV_KEY
 
     log "Setting strict permissions on the directory and files"
-    sudo chmod 700 ${IRSA_DIR}
-    sudo chmod 600 ${PKCS_KEY} ${PRIV_KEY}
+    sudo chmod 700 $IRSA_DIR
+    sudo chmod 600 $PKCS_KEY $PRIV_KEY
 
     log "Creating kubeconfig file"
     cat <<EOF > kubeadm-config.yaml
@@ -103,10 +103,10 @@ setup_controlplane() {
         service-account-key-file: /etc/kubernetes/irsa/oidc-issuer.pub
         service-account-signing-key-file: /etc/kubernetes/irsa/oidc-issuer.key
         api-audiences: "sts.amazonaws.com"
-        service-account-issuer: "https://${ISSUER_HOSTPATH}"
+        service-account-issuer: "https://$ISSUER_HOSTPATH"
       extraVolumes:
         - name: irsa-keys
-          hostPath: "$(pwd)/${IRSA_DIR}"
+          hostPath: "/home/ubuntu/$IRSA_DIR"
           mountPath: /etc/kubernetes/irsa
           readOnly: true
           pathType: DirectoryOrCreate
