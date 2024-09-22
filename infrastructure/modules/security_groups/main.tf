@@ -49,6 +49,16 @@ resource "aws_vpc_security_group_ingress_rule" "worker_ing4" {
   to_port     = 179
 }
 
+resource "aws_vpc_security_group_ingress_rule" "worker_ing5" {
+  security_group_id = aws_security_group.k8s_worker_node.id
+  description = "icmp"
+
+  cidr_ipv4   = var.vpc_cidr_block
+  from_port   = -1
+  ip_protocol = "icmp"
+  to_port     = -1
+}
+
 resource "aws_vpc_security_group_egress_rule" "worker_eg" {
   security_group_id = aws_security_group.k8s_worker_node.id
 
@@ -124,6 +134,16 @@ resource "aws_vpc_security_group_ingress_rule" "controlplane_ing6" {
   from_port   = 179
   ip_protocol = "tcp"
   to_port     = 179
+}
+
+resource "aws_vpc_security_group_ingress_rule" "controlplane_ing7" {
+  security_group_id = aws_security_group.k8s_controlplane_node.id
+  description = "icmp"
+
+  cidr_ipv4   = var.vpc_cidr_block
+  from_port   = -1
+  ip_protocol = "icmp"
+  to_port     = -1
 }
 
 resource "aws_vpc_security_group_egress_rule" "controlplane_eg" {
