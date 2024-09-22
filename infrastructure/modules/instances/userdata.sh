@@ -95,7 +95,7 @@ setup_controlplane() {
     sudo chmod 600 $PKCS_KEY $PRIV_KEY
 
     log "Creating kubeconfig file"
-    cat <<EOF > kubeadm-config.yaml
+    cat <<-EOT > kubeadm-config.yaml
     apiVersion: kubeadm.k8s.io/v1beta3
     kind: ClusterConfiguration
     apiServer:
@@ -112,7 +112,7 @@ setup_controlplane() {
           pathType: DirectoryOrCreate
     networking:
       podSubnet: 192.168.0.0/16
-EOF
+EOT
     
     log "Initializing Kubernetes controlplane node"
     sudo kubeadm init --config kubeadm-config.yaml
@@ -120,7 +120,7 @@ EOF
     log "set up kubeconfig"
     mkdir -p $HOME/.kube
     sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-    sudo chown ubuntu:ubuntu $HOME/.kube/config"
+    sudo chown ubuntu:ubuntu $HOME/.kube/config
 
     log "Installing Calico network plugin"
     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/calico.yaml
