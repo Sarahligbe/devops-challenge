@@ -162,7 +162,7 @@ EOF
     helm repo add cert-manager https://charts.jetstack.io
 
     log "Installing cert-manager helm chart"
-    helm install certs cert-manager/cert-manager --version 1.15.3 --namespace cert-manager --create-namespace
+    helm install certs cert-manager/cert-manager --version 1.15.3
 
     sleep 60s
 
