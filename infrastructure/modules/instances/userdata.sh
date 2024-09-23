@@ -96,26 +96,26 @@ setup_controlplane() {
 
     log "Creating kubeconfig file"
     cat <<EOF > kubeadm-config.yaml
-    apiVersion: kubeadm.k8s.io/v1beta4
-    kind: ClusterConfiguration
-    apiServer:
-      extraArgs:
-        service-account-key-file: /etc/kubernetes/irsa/oidc-issuer.pub
-        service-account-signing-key-file: /etc/kubernetes/irsa/oidc-issuer.key
-        api-audiences: "sts.amazonaws.com"
-        service-account-issuer: "https://$ISSUER_HOSTPATH"
-      extraVolumes:
-        - name: irsa-keys
-          hostPath: "/home/ubuntu/$IRSA_DIR"
-          mountPath: /etc/kubernetes/irsa
-          readOnly: true
-          pathType: DirectoryOrCreate
-    networking:
-      podSubnet: 192.168.0.0/16
+apiVersion: kubeadm.k8s.io/v1beta4
+kind: ClusterConfiguration
+apiServer:
+    extraArgs:
+    service-account-key-file: /etc/kubernetes/irsa/oidc-issuer.pub
+    service-account-signing-key-file: /etc/kubernetes/irsa/oidc-issuer.key
+    api-audiences: "sts.amazonaws.com"
+    service-account-issuer: "https://$ISSUER_HOSTPATH"
+    extraVolumes:
+    - name: irsa-keys
+        hostPath: "/home/ubuntu/$IRSA_DIR"
+        mountPath: /etc/kubernetes/irsa
+        readOnly: true
+        pathType: DirectoryOrCreate
+networking:
+    podSubnet: 192.168.0.0/16
 EOF
     
     log "Initializing Kubernetes controlplane node"
-    sudo kubeadm init --config kubeadm-config.yaml
+    sudo kubeadm init --config kubeadm-config.yaml --v=5
 
     log "set up kubeconfig"
     mkdir -p $HOME/.kube

@@ -1,7 +1,7 @@
 #Create an IAM Policy
 resource "aws_iam_policy" "k8s_ssm_policy" {
   name        = "node_ssm"
-  description = "Provides permission to put and get parameters in the ssm parameter store"
+  description = "Provides permission to put and get parameters in the ssm parameter store and s3 bucket"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -13,6 +13,14 @@ resource "aws_iam_policy" "k8s_ssm_policy" {
         ]
         Effect   = "Allow"
         Resource = var.k8s_join_command_arn
+      },
+
+      {
+        Action = [
+          "s3:GetObject",
+        ]
+        Effect   = "Allow"
+        Resource = ${var.irsa_bucket_arn}/*
       },
     ]
   })

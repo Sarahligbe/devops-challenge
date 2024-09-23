@@ -20,6 +20,7 @@ module "iam" {
   source = "./modules/iam"
 
   k8s_join_command_arn = module.instances.k8s_join_command_arn
+  irsa_bucket_arn      = module.irsa.irsa_bucket_arn
 }
 
 module "irsa" {
