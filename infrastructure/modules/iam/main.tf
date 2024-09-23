@@ -20,7 +20,7 @@ resource "aws_iam_policy" "k8s_ssm_policy" {
           "s3:GetObject",
         ]
         Effect   = "Allow"
-        Resource = var.irsa_bucket_arn
+        Resource = "${var.irsa_bucket_arn}/*"
       },
     ]
   })
