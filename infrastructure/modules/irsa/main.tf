@@ -89,10 +89,10 @@ resource "aws_iam_openid_connect_provider" "main" {
   thumbprint_list = [data.tls_certificate.s3.certificates[0].sha1_fingerprint]
 }
 
-resource "null_resource" "cleanup_keys" {
-  depends_on = [aws_s3_object.jwks_json, aws_iam_openid_connect_provider.main, aws_ssm_parameter.private_key, aws_ssm_parameter.public_key]
-
-  provisioner "local-exec" {
-    command = "rm -rf ${path.module}/keys"
-  }
-}
+#resource "null_resource" "cleanup_keys" {
+#  depends_on = [aws_s3_object.jwks_json, aws_iam_openid_connect_provider.main, aws_ssm_parameter.private_key, aws_ssm_parameter.public_key]
+#
+#  provisioner "local-exec" {
+#    command = "rm -rf ${path.module}/keys"
+#  }
+#}
