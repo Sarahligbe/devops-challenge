@@ -156,16 +156,16 @@ EOF
     log "Join command stored in Parameter Store"
 
     log "Installing cert manager"
-    kubectl create -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.6/cert-manager.yaml
+    kubectl create -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.yaml
 
-    sleep 30s
+    sleep 60s
 
     log "cert-manager is ready. Installing aws-pod-identity-webhook"
     kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/auth.yaml
     kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/service.yaml
     kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/mutatingwebhook.yaml
     curl -o deployment.yaml https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/deployment-base.yaml
-    sed -i 's|IMAGE|amazon/amazon-eks-pod-identity-webhook:vo.5.7|' deployment.yaml
+    sed -i 's|IMAGE|amazon/amazon-eks-pod-identity-webhook:v0.5.7|' deployment.yaml
     kubectl apply -f deployment.yaml
 
     log "aws-pod-identity-webhook installation completed"
