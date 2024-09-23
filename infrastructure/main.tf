@@ -27,7 +27,7 @@ module "iam" {
   source = "./modules/iam"
 
   k8s_join_command_arn = module.instances.k8s_join_command_arn
-  irsa_bucket_arn      = module.irsa.irsa_bucket_arn
+  s3_suffix      = var.s3_suffix
 
   depends_on           = [module.irsa]
 }
@@ -48,4 +48,8 @@ module "instances" {
   discovery_bucket_name = module.irsa.discovery_bucket_name
 
   depends_on         = [module.networking, module.irsa]
+}
+
+output "discovery_bucket_arn" {
+  value = "module.irsa.discovery_bucket_arn"
 }
