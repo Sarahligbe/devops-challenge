@@ -86,9 +86,9 @@ setup_controlplane() {
     log "Creating a directory for the IRSA bucket"
     sudo mkdir -p $IRSA_DIR
 
-    log "Retrieving IRSA keys from s3 bucket"
-    aws s3 cp s3://$DISCOVERY_BUCKET/keys/oidc-issuer.pub $PKCS_KEY
-    aws s3 cp s3://$DISCOVERY_BUCKET/keys/oidc-issuer.key $PRIV_KEY
+    log "Retrieving IRSA keys from SSM Parameter Store"
+    aws ssm get-parameter --name "/k8s/irsa/private-key" --with-decryption --query "Parameter.Value" --output text > $PRIV_KEY
+    aws ssm get-parameter --name "/k8s/irsa/public-key" --with-decryption --query "Parameter.Value" --output text > $PKCS_KEY
 
     log "Setting strict permissions on the directory and files"
     sudo chmod 700 $IRSA_DIR

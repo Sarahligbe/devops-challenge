@@ -1,29 +1,26 @@
+data "aws_iam_policy_document" "ssm" {
+  statement {
+    actions = [
+      "ssm:PutParameter",
+      "ssm:GetParameter",
+    ]
+    effect = "Allow"
+
+    resources = [
+      var.k8s_join_command_arn,
+      var.irsa_private_key_arn,
+      var.irsa_public_key_arn
+    ]
+  }
+}
+
+
 #Create an IAM Policy
 resource "aws_iam_policy" "k8s_ssm_policy" {
   name        = "node_ssm"
   description = "Provides permission to put and get parameters in the ssm parameter store and s3 bucket"
 
-  policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [
-      {
-        Action = [
-          "ssm:PutParameter",
-          "ssm:GetParameter",
-        ]
-        Effect   = "Allow"
-        Resource = var.k8s_join_command_arn
-      },
-
-      {
-        Action = [
-          "s3:GetObject",
-        ]
-        Effect   = "Allow"
-        Resource = "arn:aws:s3:::aws-irsa-oidc-discovery-${var.s3_suffix}/*"
-      },
-    ]
-  })
+  policy = data.aws_iam_policy_document.ssm.json
 }
 
 #Create the IAM Role
