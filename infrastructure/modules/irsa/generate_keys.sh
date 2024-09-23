@@ -42,6 +42,7 @@ PKCS_KEY="${KEYS_DIR}/oidc-issuer.pub"
 KEYS_FILE="${KEYS_DIR}/keys.json"
 DISCOVERY_FILE="${SCRIPT_DIR}/aws/discovery.json"
 GO_FILE="https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/hack/self-hosted/main.go"
+GO_MOD="https://raw.githubusercontent.com/fanicia/kind-aws-irsa-example/refs/heads/main/keys-generator/go.mod"
 
 #install jq
 sudo apt update
@@ -61,6 +62,7 @@ ssh-keygen -e -m PKCS8 -f "$PUB_KEY" > "$PKCS_KEY"
 # Run the Go script to generate JWKS
 echo "Generating JWKS key set..."
 curl -o "$KEYS_DIR/main.go" "$GO_FILE"
+curl -o "$KEYS_DIR/go.mod" "$GO_MOD"
 if go run -C "$KEYS_DIR" main.go -key "$PKCS_KEY" | jq > "$KEYS_FILE"; then
     echo "JWKS key set generated successfully at $KEYS_FILE"
 else
