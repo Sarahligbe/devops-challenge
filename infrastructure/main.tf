@@ -16,18 +16,20 @@ module "security_groups" {
   vpc_cidr_block  = var.vpc_cidr_block
 }
 
-module "iam" {
-  source = "./modules/iam"
-
-  k8s_join_command_arn = module.instances.k8s_join_command_arn
-  irsa_bucket_arn      = module.irsa.irsa_bucket_arn
-}
-
 module "irsa" {
   source = "./modules/irsa"
 
   region = var.region
   s3_suffix = var.s3_suffix
+}
+
+module "iam" {
+  source = "./modules/iam"
+
+  k8s_join_command_arn = module.instances.k8s_join_command_arn
+  irsa_bucket_arn      = "${module.irsa.irsa_bucket_arn}/*"
+
+  depends_on           = [module.irsa]
 }
 
 module "instances" {
