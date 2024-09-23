@@ -84,11 +84,11 @@ EOF
 
 setup_controlplane() {
     log "Creating a directory for the IRSA bucket"
-    sudo mkdir -p $IRSA_DIR
+    mkdir -p $IRSA_DIR
 
     log "Retrieving IRSA keys from SSM Parameter Store"
-    aws ssm get-parameter --name "/k8s/irsa/private-key" --with-decryption --query "Parameter.Value" --output text > $PRIV_KEY
-    aws ssm get-parameter --name "/k8s/irsa/public-key" --with-decryption --query "Parameter.Value" --output text > $PKCS_KEY
+    aws ssm get-parameter --name "/k8s/irsa/private-key" --with-decryption --query "Parameter.Value" --region $REGION --output text > $PRIV_KEY
+    aws ssm get-parameter --name "/k8s/irsa/public-key" --with-decryption --query "Parameter.Value" --region $REGION --output text > $PKCS_KEY
 
     log "Creating kubeconfig file"
     cat <<EOF > kubeadm-config.yaml
@@ -96,10 +96,14 @@ apiVersion: kubeadm.k8s.io/v1beta4
 kind: ClusterConfiguration
 apiServer:
   extraArgs:
-    service-account-key-file: /etc/kubernetes/irsa/oidc-issuer.pub
-    service-account-signing-key-file: /etc/kubernetes/irsa/oidc-issuer.key
-    api-audiences: "sts.amazonaws.com"
-    service-account-issuer: "https://$ISSUER_HOSTPATH"
+    - name: "service-account-key-file"
+      value: "/etc/kubernetes/irsa/oidc-issuer.pub"
+    - name: "service-account-signing-key-file"
+      value: "/etc/kubernetes/irsa/oidc-issuer.key"
+    - name: "api-audiences" 
+      value: "sts.amazonaws.com"
+    - name: "service-account-issuer"
+      value:  "https://$ISSUER_HOSTPATH"
   extraVolumes:
     - name: irsa-keys
       hostPath: "/home/ubuntu/$IRSA_DIR"
@@ -151,22 +155,18 @@ EOF
 
     log "Join command stored in Parameter Store"
 
-    log "Installing cert manager CRDs"
-    kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.crds.yaml
+    log "Installing cert manager"
+    kubectl create -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.6/cert-manager.yaml
 
-    log "Adding cert manager helm repo"
-    helm repo add cert-manager https://charts.jetstack.io
-
-    log "Installing cert-manager helm chart"
-    helm install certs cert-manager/cert-manager --version 1.15.3
-
-    sleep 60s
+    sleep 30s
 
     log "cert-manager is ready. Installing aws-pod-identity-webhook"
     kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/auth.yaml
     kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/service.yaml
     kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/mutatingwebhook.yaml
-    kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/deployment-base.yaml
+    curl -o deployment.yaml https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/deployment-base.yaml
+    sed -i 's|IMAGE|amazon/amazon-eks-pod-identity-webhook:vo.5.7|' deployment.yaml
+    kubectl apply -f deployment.yaml
 
     log "aws-pod-identity-webhook installation completed"
 }
