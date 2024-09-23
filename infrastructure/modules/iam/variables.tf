@@ -3,7 +3,12 @@ variable "k8s_join_command_arn" {
   type = string
 }
 
-variable "s3_suffix" {
-  description = "S3 bucket name suffix"
+variable "irsa_private_key_arn" {
+  description = "ARN for the irsa private arn"
+  type = string
+}
+
+variable "irsa_public_key_arn" {
+  description = "ARN for the irsa public arn"
   type = string
 }
