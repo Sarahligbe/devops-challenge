@@ -16,7 +16,7 @@ REGION="${region}"
 HOME="/home/ubuntu"
 # Set variables for IRSA configuration
 DISCOVERY_BUCKET="${discovery_bucket_name}" 
-IRSA_DIR="/etc/kubernetes/irsa"
+IRSA_DIR="irsa_keys"
 PKCS_KEY="$IRSA_DIR/oidc-issuer.pub"
 PRIV_KEY="$IRSA_DIR/oidc-issuer.key"
 ISSUER_HOSTPATH="s3-${region}.amazonaws.com/${discovery_bucket_name}"
@@ -90,28 +90,24 @@ setup_controlplane() {
     aws ssm get-parameter --name "/k8s/irsa/private-key" --with-decryption --query "Parameter.Value" --output text > $PRIV_KEY
     aws ssm get-parameter --name "/k8s/irsa/public-key" --with-decryption --query "Parameter.Value" --output text > $PKCS_KEY
 
-    log "Setting strict permissions on the directory and files"
-    sudo chmod 700 $IRSA_DIR
-    sudo chmod 600 $PKCS_KEY $PRIV_KEY
-
     log "Creating kubeconfig file"
     cat <<EOF > kubeadm-config.yaml
 apiVersion: kubeadm.k8s.io/v1beta4
 kind: ClusterConfiguration
 apiServer:
-    extraArgs:
+  extraArgs:
     service-account-key-file: /etc/kubernetes/irsa/oidc-issuer.pub
     service-account-signing-key-file: /etc/kubernetes/irsa/oidc-issuer.key
     api-audiences: "sts.amazonaws.com"
     service-account-issuer: "https://$ISSUER_HOSTPATH"
-    extraVolumes:
+  extraVolumes:
     - name: irsa-keys
-        hostPath: "/home/ubuntu/$IRSA_DIR"
-        mountPath: /etc/kubernetes/irsa
-        readOnly: true
-        pathType: DirectoryOrCreate
+      hostPath: "/home/ubuntu/$IRSA_DIR"
+      mountPath: /etc/kubernetes/irsa
+      readOnly: true
+      pathType: DirectoryOrCreate
 networking:
-    podSubnet: 192.168.0.0/16
+  podSubnet: 192.168.0.0/16
 EOF
     
     log "Initializing Kubernetes controlplane node"
