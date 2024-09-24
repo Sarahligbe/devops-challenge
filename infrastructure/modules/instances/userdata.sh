@@ -115,7 +115,7 @@ apiServer:
       mountPath: /etc/kubernetes/irsa
       readOnly: true
       pathType: DirectoryOrCreate
-controllerManager
+controllerManager:
   extraArgs:
     - name: "cloud-provider" 
       value: "aws"
