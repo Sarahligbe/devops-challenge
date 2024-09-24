@@ -1,19 +1,14 @@
-output "controlplane_role_name" {
-  description = "controlplane role name"
-  value = aws_iam_role.k8s_controlplane_role.name
+output "ssm_role_name" {
+  description = "ssm role name"
+  value = aws_iam_role.k8s_ssm_role.name
 }
 
-output "controlplane_profile_name" {
-  description = "controlplane role name"
-  value = aws_iam_instance_profile.controlplane_profile.name
+output "ssm_profile_name" {
+  description = "ssm role name"
+  value = aws_iam_instance_profile.ssm_profile.name
 }
 
-output "worker_role_name" {
-  description = "worker role name"
-  value = aws_iam_role.k8s_worker_role.name
-}
-
-output "worker_profile_name" {
-  description = "worker role name"
-  value = aws_iam_instance_profile.worker_profile.name
+output "aws_lb_role_name" {
+  description = "aws loadbalancer role name"
+  value = aws_iam_role.aws_lb_role.name
 }

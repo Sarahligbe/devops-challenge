@@ -46,7 +46,7 @@ module "instances" {
   worker_sg_id       = module.security_groups.worker_sg_id
   key_name           = var.key_name #provide the key name of an existing ssh key you own
   controlplane_profile_name   = module.iam.controlplane_profile_name
-  worker_profile_name   = module.iam.worker_profile_name
+  ssm_profile_name   = module.iam.ssm_profile_name
   discovery_bucket_name = module.irsa.discovery_bucket_name
 
   depends_on         = [module.networking, module.irsa]

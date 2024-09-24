@@ -12,3 +12,9 @@ variable "irsa_public_key_arn" {
   description = "ARN for the irsa public arn"
   type = string
 }
+
+variable "oidc_provider_arn" {
+  description = "ARN for the oidc provider"
+  type = string
+}
+

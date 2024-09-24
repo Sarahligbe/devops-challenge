@@ -46,15 +46,15 @@ variable "worker_count" {
   default     = 1
 }
 
-variable "controlplane_profile_name" {
-  description = "controlplane iam instance profile name"
+variable "ssm_profile_name" {
+  description = "ssm iam instance profile name"
   type        = string
 }
 
-variable "worker_profile_name" {
-  description = "worker iam instance profile name"
-  type        = string
-}
+#variable "worker_profile_name" {
+#  description = "worker iam instance profile name"
+#  type        = string
+#}
 
 variable "discovery_bucket_name" {
   description = "Name of s3 bucket were the IRSA keys are stored"

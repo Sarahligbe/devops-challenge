@@ -113,10 +113,6 @@ apiServer:
       mountPath: /etc/kubernetes/irsa
       readOnly: true
       pathType: DirectoryOrCreate
-controllerManager:
-  extraArgs:
-    - name: "cloud-provider" 
-      value: "external"
 networking:
   podSubnet: 192.168.0.0/16
 EOF
