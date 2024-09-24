@@ -27,6 +27,9 @@ log "Starting Kubernetes $NODE_TYPE node setup"
 
 # Common setup for both controlplane and worker nodes
 setup_common() {
+    log "Setting up hostname"
+    sudo hostnamectl set-hostname $(curl -s http://169.254.169.254/latest/meta-data/local-hostname)
+    
     log "Updating system and installing prerequisites"
     sudo apt update -y
     sudo apt install -y curl gnupg2 software-properties-common apt-transport-https ca-certificates
@@ -104,12 +107,18 @@ apiServer:
       value: "sts.amazonaws.com"
     - name: "service-account-issuer"
       value:  "https://$ISSUER_HOSTPATH"
+    - name: "cloud-provider" 
+      value: "aws"
   extraVolumes:
     - name: irsa-keys
       hostPath: "/home/ubuntu/$IRSA_DIR"
       mountPath: /etc/kubernetes/irsa
       readOnly: true
       pathType: DirectoryOrCreate
+controllerManager
+  extraArgs:
+    - name: "cloud-provider" 
+      value: "aws"
 networking:
   podSubnet: 192.168.0.0/16
 EOF

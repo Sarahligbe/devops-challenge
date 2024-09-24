@@ -46,8 +46,13 @@ variable "worker_count" {
   default     = 1
 }
 
-variable "ssm_profile_name" {
-  description = "ssm iam instance profile name"
+variable "controlplane_profile_name" {
+  description = "controlplane iam instance profile name"
+  type        = string
+}
+
+variable "worker_profile_name" {
+  description = "worker iam instance profile name"
   type        = string
 }
 

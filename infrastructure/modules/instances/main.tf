@@ -40,7 +40,7 @@ resource "aws_instance" "controlplane" {
   vpc_security_group_ids = [var.controlplane_sg_id]
   key_name               = data.aws_key_pair.main.key_name
   source_dest_check      = false
-  iam_instance_profile   = var.ssm_profile_name
+  iam_instance_profile   = var.controlplane_profile_name
 
   user_data = templatefile("${path.module}/userdata.sh", {node_type = "controlplane", region = "${var.region}", discovery_bucket_name = "${var.discovery_bucket_name}"})
 
@@ -57,7 +57,7 @@ resource "aws_instance" "worker" {
   vpc_security_group_ids = [var.worker_sg_id]
   key_name               = data.aws_key_pair.main.key_name
   source_dest_check      = false
-  iam_instance_profile   = var.ssm_profile_name
+  iam_instance_profile   = var.worker_profile_name
 
   user_data = templatefile("${path.module}/userdata.sh", {node_type = "worker", region = "${var.region}", discovery_bucket_name = "${var.discovery_bucket_name}"})
 
