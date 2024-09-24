@@ -107,8 +107,6 @@ apiServer:
       value: "sts.amazonaws.com"
     - name: "service-account-issuer"
       value:  "https://$ISSUER_HOSTPATH"
-    - name: "cloud-provider" 
-      value: "aws"
   extraVolumes:
     - name: irsa-keys
       hostPath: "/home/ubuntu/$IRSA_DIR"
