@@ -29,6 +29,7 @@ module "iam" {
   k8s_join_command_arn = module.instances.k8s_join_command_arn
   irsa_private_key_arn = module.irsa.irsa_private_key_arn
   irsa_public_key_arn = module.irsa.irsa_public_key_arn
+  oidc_provider_arn   = module.irsa.oidc_provider_arn
 
   depends_on           = [module.irsa]
 }
@@ -45,7 +46,6 @@ module "instances" {
   controlplane_sg_id = module.security_groups.controlplane_sg_id
   worker_sg_id       = module.security_groups.worker_sg_id
   key_name           = var.key_name #provide the key name of an existing ssh key you own
-  controlplane_profile_name   = module.iam.controlplane_profile_name
   ssm_profile_name   = module.iam.ssm_profile_name
   discovery_bucket_name = module.irsa.discovery_bucket_name
 
