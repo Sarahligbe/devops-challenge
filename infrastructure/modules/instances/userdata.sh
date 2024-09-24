@@ -122,6 +122,16 @@ EOF
     sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
     sudo chown ubuntu:ubuntu $HOME/.kube/config
 
+    log "Storing kubeconfig in SSM Parameter Store"
+    KUBECONFIG_CONTENT=$(cat $HOME/.kube/config | base64 -w 0)
+    aws ssm put-parameter \
+        --name "/k8s/kubeconfig" \
+        --type "SecureString" \
+        --value "$KUBECONFIG_CONTENT" \
+        --tier "Advanced" \
+        --region $REGION \
+        --overwrite
+
     log "Installing Calico network plugin"
     kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/$CALICO_VERSION/manifests/calico.yaml
     kubectl set env daemonset/calico-node -n kube-system ICALICO_IPV4POOL_IPIP=CrossSubnet
@@ -154,21 +164,6 @@ EOF
     fi
 
     log "Join command stored in Parameter Store"
-
-    log "Installing cert manager"
-    kubectl create -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.yaml
-
-    sleep 60s
-
-    log "cert-manager is ready. Installing aws-pod-identity-webhook"
-    kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/auth.yaml
-    kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/service.yaml
-    kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/mutatingwebhook.yaml
-    curl -o deployment.yaml https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/deployment-base.yaml
-    sed -i 's|IMAGE|amazon/amazon-eks-pod-identity-webhook:v0.5.7|' deployment.yaml
-    kubectl apply -f deployment.yaml
-
-    log "aws-pod-identity-webhook installation completed"
 }
 
 setup_worker() {
@@ -206,6 +201,40 @@ setup_worker() {
     fi
 
     log "Successfully joined the Kubernetes cluster"
+
+    log "Retrieving kubeconfig from SSM Parameter Store"
+    KUBECONFIG_CONTENT=$(aws ssm get-parameter \
+        --name "/k8s/kubeconfig" \
+        --with-decryption \
+        --query "Parameter.Value" \
+        --output text \
+        --region $REGION)
+
+    if [ -n "$KUBECONFIG_CONTENT" ]; then
+        log "Setting up kubeconfig for worker node"
+        mkdir -p $HOME/.kube
+        echo "$KUBECONFIG_CONTENT" | base64 -d > $HOME/.kube/config
+        sudo chown ubuntu:ubuntu $HOME/.kube/config
+        log "Kubeconfig set up successfully"
+    else
+        log "Error: Failed to retrieve kubeconfig from SSM Parameter Store"
+        return 1
+    fi
+
+    log "Installing cert manager"
+    kubectl create -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.yaml
+
+    sleep 60
+
+    log "cert-manager is ready. Installing aws-pod-identity-webhook"
+    kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/auth.yaml
+    kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/service.yaml
+    kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/mutatingwebhook.yaml
+    curl -o deployment.yaml https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/deployment-base.yaml
+    sed -i 's|IMAGE|amazon/amazon-eks-pod-identity-webhook:v0.5.7|' deployment.yaml
+    kubectl apply -f deployment.yaml
+
+    log "aws-pod-identity-webhook installation completed"
 
 }
 
