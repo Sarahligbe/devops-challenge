@@ -156,6 +156,12 @@ The Helm chart for the Bird application uses an umbrella chart structure with tw
 2. Conditional Deployment: Allows enabling/disabling components as needed
 3. Shared Templates: Uses _helpers.tpl for common definitions, promoting DRY principles
 4. Customizable: Extensive use of .Values for configuration
+5. Edited the source code to use environment variables to call local services
+
+![ArgoCD](./images/argocd.png) 
+![Bird](./images/bird.png)
+![BirdImage](./images/birdimage.png)
+![Grafana](./images/grafana.png)
 
 ### Usage
 1. Run
