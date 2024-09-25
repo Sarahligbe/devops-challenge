@@ -290,9 +290,9 @@ spec:
               value: 'bird.$DOMAIN'
             - name: birdimage.ingress.annotations.\\external-dns\\.alpha\\.kubernetes\\.io/hostname
               value: "birdimage.$DOMAIN"
-            - name: "bird.ingress.hosts[0].host"
+            - name: "bird.ingress.host"
               value: "bird.$DOMAIN"
-            - name: "birdimage.ingress.hosts[0].host"
+            - name: "birdimage.ingress.host"
               value: "birdimage.$DOMAIN"
       destination: 
         server: https://kubernetes.default.svc
