@@ -69,17 +69,6 @@ module "instances" {
   depends_on         = [module.networking, module.irsa]
 }
 
-# terraform_data to wait for AWS Load Balancer Controller to be ready before applying addons
-resource "terraform_data" "wait_for_aws_lb_controller" {
-  provisioner "local-exec" {
-    command = <<-EOT
-      kubectl --kubeconfig ${local_file.kubeconfig.filename} wait --for=condition=Available deployment/aws-load-balancer-controller -n kube-system --timeout=300s
-    EOT
-  }
-
-  depends_on = [module.instances]
-}
-
 module "cluster_addons" {
   source = "./modules/addons"
 
