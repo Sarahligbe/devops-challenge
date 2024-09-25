@@ -322,7 +322,7 @@ server:
       alb.ingress.kubernetes.io/target-type: instance
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
       alb.ingress.kubernetes.io/ssl-redirect: "443"
-      alb.ingress.kubernetes.io/group.name: bird_alb
+      alb.ingress.kubernetes.io/group.name: bird-alb
       alb.ingress.kubernetes.io/certificate-arn: "$CERT_ARN"
       alb.ingress.kubernetes.io/backend-protocol: HTTP
       external-dns.alpha.kubernetes.io/hostname: "argocd.$DOMAIN"
@@ -344,6 +344,60 @@ EOF
 
     log "Argocd installed successfully"
 
+    log "Deploy bird app"
+    cat <<EOF > bird_appset.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: birdapp
+  namespace: argocd
+spec: 
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators: 
+  - git: 
+      repoURL: https://github.com/Sarahligbe/devops-challenge.git
+      revision: HEAD
+      directories: 
+      - path: helm
+  template: 
+    metadata: 
+      name: '{{.path.basename}}'
+    spec: 
+      project: default
+      sources: 
+        - repoURL: https://github.com/Sarahligbe/devops-challenge.git
+          targetRevision: HEAD
+          path: '{{.path.path}}'
+          helm:
+            parameters:
+            - name: "global.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/listen-ports"
+              value: '[{"HTTPS":443}]'
+            - name: "global.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/ssl-redirect"
+              value: "443"
+            - name: "global.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn"
+              value: "${CERT_ARN}"
+            - name: "bird.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
+              value: 'bird.${DOMAIN}'
+            - name: "birdimage.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
+              value: 'birdimage.${DOMAIN}'
+            - name: "bird.ingress.hosts[0].host"
+              value: "bird.${DOMAIN}"
+            - name: "birdimage.ingress.hosts[0].host"
+              value: "birdimage.${DOMAIN}"
+      destination: 
+        server: https://kubernetes.default.svc
+        namespace: '{{.path.basename}}'
+      syncPolicy: 
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
+EOF
+    log "Applying birdapp argocd manifest"
+    kubectl apply -f bird_appset.yaml
+
     log "Installing Prometheus and grafana"
     cat <<EOF > prometheus_values.yaml
 prometheus:
@@ -359,7 +413,7 @@ grafana:
       alb.ingress.kubernetes.io/target-type: instance
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
       alb.ingress.kubernetes.io/ssl-redirect: "443"
-      alb.ingress.kubernetes.io/group.name: bird_alb
+      alb.ingress.kubernetes.io/group.name: bird-alb
       alb.ingress.kubernetes.io/certificate-arn: $CERT_ARN
       alb.ingress.kubernetes.io/backend-protocol: HTTP
       alb.ingress.kubernetes.io/healthcheck-path: /login

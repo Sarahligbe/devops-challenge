@@ -52,7 +52,8 @@ spec:
   {{- end }}
   rules:
     {{- range .Values.ingress.hosts }}
-    - http:
+    - host: {{ .host | quote }}
+      http:
         paths:
           {{- range .paths }}
           - path: {{ .path }}

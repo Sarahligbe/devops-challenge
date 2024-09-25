@@ -8,6 +8,7 @@ import (
 	"math/rand/v2"
 	"net/http"
 	"net/url"
+	"os"
 )
 
 type Bird struct {

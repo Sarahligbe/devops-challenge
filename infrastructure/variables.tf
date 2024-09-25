@@ -30,7 +30,7 @@ variable "public_subnet_count" {
 variable "instance_type" {
   description = "EC2 instance type for Kubernetes nodes"
   type        = string
-  default     = "t3.medium"
+  default     = "t3.large"
 }
 
 variable "key_name" {

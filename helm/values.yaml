@@ -3,9 +3,8 @@ global:
   ingress:
     annotations:
       alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/tags: Environment=dev,Team=test
       alb.ingress.kubernetes.io/target-type: 'instance'
-      alb.ingress.kubernetes.io/group.name: bird_alb
+      alb.ingress.kubernetes.io/group.name: bird-alb
 
 bird:
   enabled: true

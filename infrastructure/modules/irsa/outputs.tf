@@ -7,7 +7,7 @@ output "oidc_provider_url" {
 }
 
 output "oidc_provider" {
-  value = trim(aws_iam_openid_connect_provider.main.url, "https://")
+  value = "s3-${var.region}.amazonaws.com/${aws_s3_bucket.discovery_bucket.id}"
 }
 
 output "oidc_provider_arn" {
