@@ -48,6 +48,7 @@ module "instances" {
   key_name           = var.key_name #provide the key name of an existing ssh key you own
   ssm_profile_name   = module.iam.ssm_profile_name
   discovery_bucket_name = module.irsa.discovery_bucket_name
+  aws_lb_role_arn       = module.iam.aws_lb_role_arn
 
   depends_on         = [module.networking, module.irsa]
 }

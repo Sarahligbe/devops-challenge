@@ -22,13 +22,17 @@ PRIV_KEY="$IRSA_DIR/oidc-issuer.key"
 ISSUER_HOSTPATH="s3-${region}.amazonaws.com/${discovery_bucket_name}"
 # Determine if this is a controlplane or worker node
 NODE_TYPE="${node_type}"
+CLUSTER_NAME="${cluster_name}"
+AWS_LB_ROLE_ARN="${aws_lb_role_arn}"
+HOSTNAME="$(curl -s http://169.254.169.254/latest/meta-data/local-hostname)"
+INSTANCE_ID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
 
 log "Starting Kubernetes $NODE_TYPE node setup"
 
 # Common setup for both controlplane and worker nodes
 setup_common() {
     log "Setting up hostname"
-    sudo hostnamectl set-hostname $(curl -s http://169.254.169.254/latest/meta-data/local-hostname)
+    sudo hostnamectl set-hostname $HOSTNAME
     
     log "Updating system and installing prerequisites"
     sudo apt update -y
@@ -167,6 +171,9 @@ EOF
     fi
 
     log "Join command stored in Parameter Store"
+
+    log "Update providerID"
+    kubectl patch node $HOSTNAME -p "{\"spec\":{\"providerID\":\"aws://$REGION/$INSTANCE_ID\"}}"
 }
 
 setup_worker() {
@@ -218,6 +225,7 @@ setup_worker() {
         mkdir -p $HOME/.kube
         echo "$KUBECONFIG_CONTENT" | base64 -d > $HOME/.kube/config
         sudo chown ubuntu:ubuntu $HOME/.kube/config
+        chmod 700 $HOME/.kube
         log "Kubeconfig set up successfully"
     else
         log "Error: Failed to retrieve kubeconfig from SSM Parameter Store"
@@ -239,6 +247,24 @@ setup_worker() {
 
     log "aws-pod-identity-webhook installation completed"
 
+    log "Update providerID"
+    kubectl patch node $HOSTNAME -p "{\"spec\":{\"providerID\":\"aws://$REGION/$INSTANCE_ID\"}}"
+
+    log "Setting up aws loadbalancer controller"
+    cat <<EOF > aws_lb_service_account.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aws-load-balancer-controller
+  namespace: kube-system
+  annotations:
+    eks.amazonaws.com/role-arn: $AWS_LB_ROLE_ARN
+EOF
+    kubectl apply -f aws_lb_service_account.yaml
+    helm repo add eks https://aws.github.io/eks-charts
+    helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=$CLUSTER_NAME --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller
+    
+    log "AWS LBC installed successfully"
 }
 
 # Main execution
@@ -256,6 +282,8 @@ export ISSUER_HOSTPATH="$ISSUER_HOSTPATH"
 export K8S_VERSION="$K8S_VERSION"
 export CALICO_VERSION="$CALICO_VERSION"
 export POD_NETWORK_CIDR="$POD_NETWORK_CIDR"
+export HOSTNAME="$HOSTNAME"
+export INSTANCE_ID="$INSTANCE_ID"
 $(declare -f log setup_controlplane)
 setup_controlplane
 EOF

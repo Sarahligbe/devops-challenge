@@ -12,3 +12,8 @@ output "aws_lb_role_name" {
   description = "aws loadbalancer role name"
   value = aws_iam_role.aws_lb_role.name
 }
+
+output "aws_lb_role_arn" {
+  description = "aws loadbalancer role arn"
+  value = aws_iam_role.aws_lb_role.arn
+}
