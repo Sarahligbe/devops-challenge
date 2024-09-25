@@ -2,6 +2,8 @@ replicaCount: 1
 
 namespace: birdapp
 
+name: bird
+
 image:
   repository: sayaligbe/bird
   pullPolicy: Always

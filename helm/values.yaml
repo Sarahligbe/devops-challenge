@@ -7,6 +7,7 @@ global:
 
 bird:
   enabled: true
+  name: bird
   service:
     type: ClusterIP
     port: 4201
@@ -23,6 +24,7 @@ bird:
 
 birdimage:
   enabled: true
+  name: birdimage
   service:
     type: ClusterIP
     port: 4200

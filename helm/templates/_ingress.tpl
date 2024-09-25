@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Chart.Name }}-ingress
+  name: {{ .Values.name }}-ingress
   namespace: {{ .Values.namespace | default .Values.global.namespace }}
   labels:
     test: test
@@ -26,7 +26,7 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ .Chart.Name }}-svc
+                name: {{ $.Values.name }}-svc
                 port: 
                   number: {{ $.Values.service.port }}
           {{- end }}
