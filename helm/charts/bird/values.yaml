@@ -3,7 +3,7 @@ replicaCount: 1
 namespace: birdapp
 
 image:
-  repository: sayligbe/bird
+  repository: sayaligbe/bird
   pullPolicy: Always
   tag: "v1.0.0"
 

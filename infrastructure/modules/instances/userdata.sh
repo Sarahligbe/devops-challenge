@@ -316,6 +316,7 @@ elif [ "$NODE_TYPE" == "worker" ]; then
 export REGION="$REGION"
 export K8S_VERSION="$K8S_VERSION"
 export CLUSTER_NAME="$CLUSTER_NAME"
+export AWS_LB_ROLE_ARN="$AWS_LB_ROLE_ARN"
 $(declare -f log setup_worker)
 setup_worker
 EOF
