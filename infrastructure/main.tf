@@ -84,9 +84,10 @@ module "cluster_addons" {
   source = "./modules/addons"
 
   domain            = var.domain
-  enable_ssl        = true
   enable_argocd     = true
   enable_monitoring = true
+  argopass          = var.argopass
+  grafana_passwd    = var.grafana_passwd
 
   depends_on = [terraform_data.wait_for_aws_lb_controller]
 }

@@ -60,3 +60,13 @@ variable "domain" {
   description = "Domain name"
   type = string
 }
+
+variable "argopass" {
+  description = "ArgoCD password"
+  type = string
+}
+
+variable "grafana_passwd" {
+  description = "Grafana password"
+  type = string
+}
