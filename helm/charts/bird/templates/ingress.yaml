@@ -1,0 +1,3 @@
+{{- if .Values.ingress.enabled -}}
+{{- include "common.ingress" (dict "chartName" "bird" "Values" .Values "Chart" .Chart) -}}
+{{- end }}

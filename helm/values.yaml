@@ -1,8 +1,32 @@
 global:
   namespace: birdapp
+  ingress:
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/tags: Environment=dev,Team=test
 
 bird:
   enabled: true
+  ingress:
+    enabled: true
+    className: "alb"
+    annotations: {}
+    hosts:
+      - host: ""
+        paths:
+          - path: /
+            pathType: Exact
+    tls: []
 
 birdimage:
-  enabled: true
+  enabled: false
+  ingress:
+    enabled: true
+    className: ""
+    annotations: {}
+    hosts:
+      - host: ""
+        paths:
+          - path: /
+            pathType: Prefix
+    tls: []
