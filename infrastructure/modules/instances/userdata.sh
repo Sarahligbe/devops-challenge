@@ -226,6 +226,7 @@ setup_worker() {
         echo "$KUBECONFIG_CONTENT" | base64 -d > $HOME/.kube/config
         sudo chown ubuntu:ubuntu $HOME/.kube/config
         chmod 700 $HOME/.kube
+        chmod 600 $HOME/.kube/config
         log "Kubeconfig set up successfully"
     else
         log "Error: Failed to retrieve kubeconfig from SSM Parameter Store"
@@ -235,7 +236,27 @@ setup_worker() {
     log "Installing cert manager"
     kubectl create -f https://github.com/cert-manager/cert-manager/releases/download/v1.15.3/cert-manager.yaml
 
-    sleep 60
+    log "Waiting for cert-manager pods to be ready"
+    kubectl wait --for=condition=Ready pods --all -n cert-manager --timeout=300s
+
+    log "Verifying cert-manager webhook"
+    # Retry mechanism for webhook verification
+    max_attempts=5
+    attempt=1
+    while [ $attempt -le $max_attempts ]; do
+        if kubectl get validatingwebhookconfigurations cert-manager-webhook -o jsonpath='{.webhooks[0].clientConfig.service.name}' | grep -q "cert-manager-webhook"; then
+            log "Cert-manager webhook is verified and ready"
+            break
+        fi
+        log "Attempt $attempt: Cert-manager webhook not ready yet, waiting 30 seconds..."
+        sleep 30
+        attempt=$((attempt+1))
+    done
+
+    if [ $attempt -gt $max_attempts ]; then
+        log "Error: Cert-manager webhook not ready after $max_attempts attempts"
+        return 1
+    fi
 
     log "cert-manager is ready. Installing aws-pod-identity-webhook"
     kubectl create -f https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/auth.yaml
@@ -244,6 +265,9 @@ setup_worker() {
     curl -o deployment.yaml https://raw.githubusercontent.com/aws/amazon-eks-pod-identity-webhook/refs/heads/master/deploy/deployment-base.yaml
     sed -i 's|IMAGE|amazon/amazon-eks-pod-identity-webhook:v0.5.7|' deployment.yaml
     kubectl apply -f deployment.yaml
+    
+    log "Waiting for pod identity pods to be ready"
+    kubectl wait --for=condition=Ready pods --all -n cert-manager --timeout=300s
 
     log "aws-pod-identity-webhook installation completed"
 
@@ -291,6 +315,7 @@ elif [ "$NODE_TYPE" == "worker" ]; then
     /sbin/runuser -l ubuntu << EOF
 export REGION="$REGION"
 export K8S_VERSION="$K8S_VERSION"
+export CLUSTER_NAME="$CLUSTER_NAME"
 $(declare -f log setup_worker)
 setup_worker
 EOF

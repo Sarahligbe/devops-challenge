@@ -1,3 +1,19 @@
+data "aws_ssm_parameter" "kubeconfig" {
+  name            = "/k8s/kubeconfig"
+  with_decryption = true
+}
+
+# Decode the base64-encoded kubeconfig
+locals {
+  kubeconfig = base64decode(data.aws_ssm_parameter.kubeconfig.value)
+}
+
+# Write kubeconfig to a local file (optional, but useful for debugging)
+resource "local_file" "kubeconfig" {
+  content  = local.kubeconfig
+  filename = "${path.module}/kubeconfig"
+}
+
 module "networking" {
   source = "./modules/networking"
 
