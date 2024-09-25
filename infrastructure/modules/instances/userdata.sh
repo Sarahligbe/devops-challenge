@@ -322,6 +322,7 @@ server:
       alb.ingress.kubernetes.io/group.order: "2"
       alb.ingress.kubernetes.io/certificate-arn: "$CERT_ARN"
       alb.ingress.kubernetes.io/backend-protocol: HTTP
+      external-dns.alpha.kubernetes.io/hostname: "argocd.$DOMAIN"
     hostname: "argocd.$DOMAIN"
     paths:
       - /
@@ -334,7 +335,7 @@ applicationSet:
   enabled: true
 EOF
     helm repo add argo https://argoproj.github.io/argo-helm
-    helm install argocd argo/argo-cd --version 7.6.2 --namespace argocd --create-namespace --values argo_cd_values.yaml
+    helm install argocd argo/argo-cd --namespace argocd --create-namespace --values argo_cd_values.yaml
 
     kubectl wait --for=condition=Ready pods --all -n argocd --timeout=300s
 
@@ -361,6 +362,7 @@ grafana:
       alb.ingress.kubernetes.io/certificate-arn: $CERT_ARN
       alb.ingress.kubernetes.io/backend-protocol: HTTP
       alb.ingress.kubernetes.io/healthcheck-path: /login
+      external-dns.alpha.kubernetes.io/hostname: "grafana.$DOMAIN"
     hosts:
       - "grafana.$DOMAIN"
     path: /
