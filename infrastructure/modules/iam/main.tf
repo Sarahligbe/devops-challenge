@@ -374,3 +374,62 @@ resource "aws_iam_role_policy_attachment" "aws_lb_attach" {
   role       = aws_iam_role.aws_lb_role.name
   policy_arn = aws_iam_policy.aws_lb_policy.arn
 }
+
+data "aws_iam_policy_document" "dns" {
+  statement {
+    actions = [
+      "route53:ChangeResourceRecordSets",
+    ]
+    effect = "Allow"
+
+    resources = ["arn:aws:route53:::hostedzone/*"]
+  }
+
+  statement {
+    actions = [
+      "route53:ListHostedZones",
+      "route53:ListResourceRecordSets",
+      "route53:ListTagsForResource",
+    ]
+    effect = "Allow"
+
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "dns_policy" {
+  name        = "ExternalDNSPolicy"
+  description = "Provides permission to create dns records"
+
+  policy = data.aws_iam_policy_document.dns.json
+}
+
+#Create the IAM Role for aws loadbalancer
+resource "aws_iam_role" "dns_role" {
+  name = "dns_role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Effect = "Allow"
+        Sid    = ""
+        Principal = {
+          Federated = var.oidc_provider_arn
+        }
+        "Condition": {
+           "StringEquals": {
+              "${var.oidc_provider}:sub": "system:serviceaccount:default:external-dns",
+              "${var.oidc_provider}:aud": "sts.amazonaws.com"
+          }
+        }
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "dns_attach" {
+  role       = aws_iam_role.dns_role.name
+  policy_arn = aws_iam_policy.dns_policy.arn
+}

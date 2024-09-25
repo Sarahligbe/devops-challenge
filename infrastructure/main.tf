@@ -46,6 +46,7 @@ module "iam" {
   irsa_private_key_arn = module.irsa.irsa_private_key_arn
   irsa_public_key_arn = module.irsa.irsa_public_key_arn
   oidc_provider_arn   = module.irsa.oidc_provider_arn
+  oidc_provider       = module.irsa.oidc_provider
 
   depends_on           = [module.irsa]
 }
@@ -65,6 +66,7 @@ module "instances" {
   ssm_profile_name   = module.iam.ssm_profile_name
   discovery_bucket_name = module.irsa.discovery_bucket_name
   aws_lb_role_arn       = module.iam.aws_lb_role_arn
+  dns_role_arn       = module.iam.dns_role_arn
   domain            = var.domain
   grafana_passwd    = var.grafana_passwd
   cert_arn          = module.cluster_addons.cert_arn

@@ -17,3 +17,8 @@ output "aws_lb_role_arn" {
   description = "aws loadbalancer role arn"
   value = aws_iam_role.aws_lb_role.arn
 }
+
+output "dns_role_arn" {
+  description = "external dns role arn"
+  value = aws_iam_role.dns_role.arn
+}

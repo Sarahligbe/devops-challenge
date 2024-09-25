@@ -29,6 +29,7 @@ INSTANCE_ID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
 GRAFANA_PASSWD="${grafana_passwd}"
 CERT_ARN="${cert_arn}"
 DOMAIN="${domain}"
+DNS_ROLE_ARN="${dns_role_arn}"
 
 log "Starting Kubernetes $NODE_TYPE node setup"
 
@@ -295,9 +296,18 @@ EOF
     log "AWS LBC installed successfully"
 
     log "Installing external dns"
-    curl -o external-dns.yaml https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.0.0/docs/examples/external-dns.yaml
-    sed -i "s/--domain-filter=[^ ]*/--domain-filter=$DOMAIN/" external-dns.yaml
-    kubectl apply -f external-dns.yaml
+    cat <<EOF > external_dns_values.yaml
+provider:
+  name: aws
+env:
+  - name: AWS_DEFAULT_REGION
+    value: "$REGION"
+serviceAccount:
+  annotations:
+    eks.amazonaws.com/role-arn: $DNS_ROLE_ARN
+EOF
+    helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
+    helm install external-dns external-dns/external-dns --values external_dns_values.yaml
 
     log "installing argocd"
     cat <<EOF > argo_cd_values.yaml
@@ -310,11 +320,9 @@ server:
     annotations:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: instance
-      alb.ingress.kubernetes.io/load-balancer-name: alb
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
       alb.ingress.kubernetes.io/ssl-redirect: "443"
       alb.ingress.kubernetes.io/group.name: bird_alb
-      alb.ingress.kubernetes.io/group.order: "2"
       alb.ingress.kubernetes.io/certificate-arn: "$CERT_ARN"
       alb.ingress.kubernetes.io/backend-protocol: HTTP
       external-dns.alpha.kubernetes.io/hostname: "argocd.$DOMAIN"
@@ -349,11 +357,9 @@ grafana:
     annotations:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/target-type: instance
-      alb.ingress.kubernetes.io/load-balancer-name: alb
       alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
       alb.ingress.kubernetes.io/ssl-redirect: "443"
       alb.ingress.kubernetes.io/group.name: bird_alb
-      alb.ingress.kubernetes.io/group.order: "1"
       alb.ingress.kubernetes.io/certificate-arn: $CERT_ARN
       alb.ingress.kubernetes.io/backend-protocol: HTTP
       alb.ingress.kubernetes.io/healthcheck-path: /login
@@ -404,6 +410,7 @@ export INSTANCE_ID="$INSTANCE_ID"
 export GRAFANA_PASSWD="$GRAFANA_PASSWD"
 export CERT_ARN="$CERT_ARN"
 export DOMAIN="$DOMAIN"
+export DNS_ROLE_ARN="$DNS_ROLE_ARN"
 $(declare -f log setup_worker)
 setup_worker
 EOF

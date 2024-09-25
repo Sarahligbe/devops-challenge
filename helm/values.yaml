@@ -6,7 +6,6 @@ global:
       alb.ingress.kubernetes.io/tags: Environment=dev,Team=test
       alb.ingress.kubernetes.io/target-type: 'instance'
       alb.ingress.kubernetes.io/group.name: bird_alb
-      alb.ingress.kubernetes.io/group.order: "3"
 
 bird:
   enabled: true

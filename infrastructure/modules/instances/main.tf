@@ -42,7 +42,7 @@ resource "aws_instance" "controlplane" {
   source_dest_check      = false
   iam_instance_profile   = var.ssm_profile_name
 
-  user_data = templatefile("${path.module}/userdata.sh", {node_type = "controlplane", region = "${var.region}", discovery_bucket_name = "${var.discovery_bucket_name}", cluster_name = "${var.cluster_name}", aws_lb_role_arn ="${var.aws_lb_role_arn}", domain = "${var.domain}", cert_arn = "${var.cert_arn}", grafana_passwd = "${var.grafana_passwd}"})
+  user_data = templatefile("${path.module}/userdata.sh", {node_type = "controlplane", region = "${var.region}", discovery_bucket_name = "${var.discovery_bucket_name}", cluster_name = "${var.cluster_name}", aws_lb_role_arn ="${var.aws_lb_role_arn}", domain = "${var.domain}", cert_arn = "${var.cert_arn}", grafana_passwd = "${var.grafana_passwd}", dns_role_arn = "${var.dns_role_arn}"})
 
   tags = {
     Name = "k8s-controlplane-${count.index + 1}"
@@ -59,7 +59,7 @@ resource "aws_instance" "worker" {
   source_dest_check      = false
   iam_instance_profile   = var.ssm_profile_name
 
-  user_data = templatefile("${path.module}/userdata.sh", {node_type = "worker", region = "${var.region}", discovery_bucket_name = "${var.discovery_bucket_name}", cluster_name = "${var.cluster_name}", aws_lb_role_arn ="${var.aws_lb_role_arn}", domain = "${var.domain}", cert_arn = "${var.cert_arn}", grafana_passwd = "${var.grafana_passwd}"})
+  user_data = templatefile("${path.module}/userdata.sh", {node_type = "worker", region = "${var.region}", discovery_bucket_name = "${var.discovery_bucket_name}", cluster_name = "${var.cluster_name}", aws_lb_role_arn ="${var.aws_lb_role_arn}", domain = "${var.domain}", cert_arn = "${var.cert_arn}", grafana_passwd = "${var.grafana_passwd}", dns_role_arn = "${var.dns_role_arn}"})
 
   tags = {
     Name = "k8s-worker-${count.index + 1}"

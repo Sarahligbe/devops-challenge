@@ -75,3 +75,8 @@ variable "domain" {
   description = "Domain name"
   type = string
 }
+
+variable "dns_role_arn" {
+  description = "external dns role arn"
+  type = string
+}
