@@ -26,7 +26,7 @@ spec:
             pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ include (print $.chartName ".fullname") $ }}
+                name: {{ .Chart.Name }}-svc
                 port: 
                   number: {{ $.Values.service.port }}
           {{- end }}

@@ -7,6 +7,9 @@ global:
 
 bird:
   enabled: true
+  service:
+    type: ClusterIP
+    port: 4201
   ingress:
     enabled: true
     className: "alb"
@@ -20,6 +23,9 @@ bird:
 
 birdimage:
   enabled: true
+  service:
+    type: ClusterIP
+    port: 4200
   ingress:
     enabled: true
     className: "alb"
