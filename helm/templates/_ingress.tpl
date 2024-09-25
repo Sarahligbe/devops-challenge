@@ -2,10 +2,10 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include (print .chartName ".fullname") . }}
+  name: {{ .Chart.Name }}-ingress
   namespace: {{ .Values.namespace | default .Values.global.namespace }}
   labels:
-    {{- include (print .chartName ".labels") . | nindent 4 }}
+    test: test
   annotations:
     {{- with .Values.global.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
