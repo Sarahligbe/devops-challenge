@@ -54,9 +54,7 @@ resource "aws_vpc_security_group_ingress_rule" "worker_ing5" {
   description = "IP-IP protocol"
 
   cidr_ipv4   = var.vpc_cidr_block
-  from_port   = 0
   ip_protocol = "4"
-  to_port     = 0
 }
 
 resource "aws_vpc_security_group_egress_rule" "worker_eg" {
@@ -141,9 +139,7 @@ resource "aws_vpc_security_group_ingress_rule" "controlplane_ing7" {
   description = "IP-IP protocol"
 
   cidr_ipv4   = var.vpc_cidr_block
-  from_port   = 0
   ip_protocol = "4"
-  to_port     = 0
 }
 
 resource "aws_vpc_security_group_egress_rule" "controlplane_eg" {
