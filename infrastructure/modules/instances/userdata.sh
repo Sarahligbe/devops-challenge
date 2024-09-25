@@ -27,7 +27,6 @@ AWS_LB_ROLE_ARN="${aws_lb_role_arn}"
 HOSTNAME="$(curl -s http://169.254.169.254/latest/meta-data/local-hostname)"
 INSTANCE_ID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
 GRAFANA_PASSWD="${grafana_passwd}"
-ARGOPASS="${argopass}"
 CERT_ARN="${cert_arn}"
 DOMAIN="${domain}"
 
@@ -304,10 +303,6 @@ EOF
     cat <<EOF > argo_cd_values.yaml
 global:
   domain: "argocd.$DOMAIN"
-configs:
-  secret:
-  #This is bcrypt hashed
-    argocdServerAdminPassword: "$ARGOPASS"
 server:
   ingress:
     enabled: true
@@ -407,7 +402,6 @@ export CLUSTER_NAME="$CLUSTER_NAME"
 export AWS_LB_ROLE_ARN="$AWS_LB_ROLE_ARN"
 export INSTANCE_ID="$INSTANCE_ID"
 export GRAFANA_PASSWD="$GRAFANA_PASSWD"
-export ARGOPASS="$ARGOPASS"
 export CERT_ARN="$CERT_ARN"
 export DOMAIN="$DOMAIN"
 $(declare -f log setup_worker)

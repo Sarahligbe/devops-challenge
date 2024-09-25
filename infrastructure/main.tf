@@ -66,7 +66,6 @@ module "instances" {
   discovery_bucket_name = module.irsa.discovery_bucket_name
   aws_lb_role_arn       = module.iam.aws_lb_role_arn
   domain            = var.domain
-  argopass          = var.argopass
   grafana_passwd    = var.grafana_passwd
   cert_arn          = module.cluster_addons.cert_arn
 
