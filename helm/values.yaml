@@ -4,6 +4,7 @@ global:
     annotations:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/tags: Environment=dev,Team=test
+      alb.ingress.kubernetes.io/target-type: 'ip'
 
 bird:
   enabled: true

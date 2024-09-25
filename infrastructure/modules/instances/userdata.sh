@@ -317,6 +317,7 @@ export REGION="$REGION"
 export K8S_VERSION="$K8S_VERSION"
 export CLUSTER_NAME="$CLUSTER_NAME"
 export AWS_LB_ROLE_ARN="$AWS_LB_ROLE_ARN"
+export INSTANCE_ID="$INSTANCE_ID"
 $(declare -f log setup_worker)
 setup_worker
 EOF
