@@ -78,5 +78,5 @@ module "cluster_addons" {
   argopass          = var.argopass
   grafana_passwd    = var.grafana_passwd
 
-  depends_on = [terraform_data.wait_for_aws_lb_controller]
+  depends_on = [module.instances]
 }
