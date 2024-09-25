@@ -378,13 +378,13 @@ spec:
             - name: "global.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn"
               value: "$CERT_ARN"
             - name: "bird.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
-              value: 'bird.${DOMAIN}'
+              value: 'bird.$DOMAIN'
             - name: "birdimage.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
-              value: 'birdimage.${DOMAIN}'
+              value: "birdimage.$DOMAIN"
             - name: "bird.ingress.hosts[0].host"
-              value: "bird.${DOMAIN}"
+              value: "bird.$DOMAIN"
             - name: "birdimage.ingress.hosts[0].host"
-              value: "birdimage.${DOMAIN}"
+              value: "birdimage.$DOMAIN"
       destination: 
         server: https://kubernetes.default.svc
         namespace: '{{.path.basename}}'
