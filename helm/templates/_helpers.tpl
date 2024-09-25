@@ -36,7 +36,6 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Values.name }}-ingress
-  namespace: {{ .Values.namespace | default .Values.global.namespace }}
   labels:
     test: test
   annotations:

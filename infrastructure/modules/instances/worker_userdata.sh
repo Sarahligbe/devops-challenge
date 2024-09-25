@@ -284,15 +284,11 @@ spec:
           path: '{{.path.path}}'
           helm:
             parameters:
-            - name: "global.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/listen-ports"
-              value: '[{"HTTPS":443}]'
-            - name: "global.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/ssl-redirect"
-              value: "443"
-            - name: "global.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn"
+            - name: global.ingress.annotations.\\alb\\.ingress\\.kubernetes\\.io/certificate-arn
               value: "$CERT_ARN"
-            - name: "bird.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
+            - name: bird.ingress.annotations.\\external-dns\\.alpha\\.kubernetes\\.io/hostname
               value: 'bird.$DOMAIN'
-            - name: "birdimage.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
+            - name: birdimage.ingress.annotations.\\external-dns\\.alpha\\.kubernetes\\.io/hostname
               value: "birdimage.$DOMAIN"
             - name: "bird.ingress.hosts[0].host"
               value: "bird.$DOMAIN"

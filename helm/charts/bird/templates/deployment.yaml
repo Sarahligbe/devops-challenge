@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "bird.fullname" . }}
-  namespace: {{ .Values.namespace }}
   labels:
     {{- include "bird.labels" . | nindent 4 }}
 spec:
