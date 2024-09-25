@@ -17,11 +17,9 @@ bird:
     enabled: true
     className: "alb"
     annotations: {}
-    hosts:
-      - host: ""
-        paths:
-          - path: /
-            pathType: Prefix
+    host: ""
+    path: /
+    pathType: Prefix
     tls: []
 
 birdimage:
@@ -34,9 +32,7 @@ birdimage:
     enabled: true
     className: "alb"
     annotations: {}
-    hosts:
-      - host: ""
-        paths:
-          - path: /
-            pathType: Prefix
+    host: ""
+    path: /
+    pathType: Prefix
     tls: []

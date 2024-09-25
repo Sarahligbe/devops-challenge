@@ -50,20 +50,16 @@ spec:
   ingressClassName: {{ .Values.ingress.className }}
   {{- end }}
   rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
+    - host: {{ .Values.host }}
       http:
         paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            pathType: {{ .pathType }}
+          - path: {{ .Values.ingress.path }}
+            pathType: {{ .Values.ingress.pathType }}
             backend:
               service:
-                name: {{ $.Values.name }}-svc
+                name: {{ .Values.name }}-svc
                 port: 
-                  number: {{ $.Values.service.port }}
-          {{- end }}
-    {{- end }}
+                  number: {{ .Values.service.port }}
   {{- if .Values.ingress.tls }}
   tls:
     {{- range .Values.ingress.tls }}
