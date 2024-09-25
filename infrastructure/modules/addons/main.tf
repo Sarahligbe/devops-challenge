@@ -5,7 +5,7 @@ data "aws_route53_zone" "main" {
 
 # Request ACM certificate
 resource "aws_acm_certificate" "main" {
-  domain_name       = "var.domain"
+  domain_name       = var.domain
   validation_method = "DNS"
   subject_alternative_names = ["*.${var.domain}"]
 
@@ -35,6 +35,10 @@ resource "aws_route53_record" "main" {
 resource "aws_acm_certificate_validation" "main" {
   certificate_arn         = aws_acm_certificate.main.arn
   validation_record_fqdns = [for record in aws_route53_record.main : record.fqdn]
+
+  timeouts {
+    create = "60m"
+  }
 }
 
 resource "helm_release" "argocd-helm" {
