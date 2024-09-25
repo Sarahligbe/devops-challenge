@@ -48,7 +48,7 @@ resource "helm_release" "argocd-helm" {
   namespace  = "argocd"
   create_namespace = true
 
-  values = [templatefile("argo_cd_values.yaml", {argopass = "${var.argopass}", domain = "${domain}", cert_arn = "${aws_acm_certificate.main.arn}"})]
+  values = [templatefile("argo_cd_values.yaml", {argopass = "${var.argopass}", domain = "${var.domain}", cert_arn = "${aws_acm_certificate.main.arn}"})]
 }
 
 resource "helm_release" "prometheus" {
@@ -62,6 +62,6 @@ resource "helm_release" "prometheus" {
   version = "62.7.0"
   timeout = 1000
  
-  values = [templatefile("prometheus_values.yaml", {grafana_passwd = "${var.grafana_passwd}", domain = "${domain}", cert_arn = "${aws_acm_certificate.main.arn}" })]
+  values = [templatefile("prometheus_values.yaml", {grafana_passwd = "${var.grafana_passwd}", domain = "${var.domain}", cert_arn = "${aws_acm_certificate.main.arn}" })]
 }
 
