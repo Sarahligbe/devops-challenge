@@ -50,7 +50,7 @@ spec:
   ingressClassName: {{ .Values.ingress.className }}
   {{- end }}
   rules:
-    - host: {{ .Values.host }}
+    - host: {{ .Values.ingress.host }}
       http:
         paths:
           - path: {{ .Values.ingress.path }}
