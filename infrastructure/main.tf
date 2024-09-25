@@ -8,7 +8,7 @@ locals {
   kubeconfig = base64decode(data.aws_ssm_parameter.kubeconfig.value)
 }
 
-# Write kubeconfig to a local file (optional, but useful for debugging)
+# Write kubeconfig to a local file
 resource "local_file" "kubeconfig" {
   content  = local.kubeconfig
   filename = "${path.module}/kubeconfig"
@@ -67,4 +67,26 @@ module "instances" {
   aws_lb_role_arn       = module.iam.aws_lb_role_arn
 
   depends_on         = [module.networking, module.irsa]
+}
+
+# terraform_data to wait for AWS Load Balancer Controller to be ready before applying addons
+resource "terraform_data" "wait_for_aws_lb_controller" {
+  provisioner "local-exec" {
+    command = <<-EOT
+      kubectl --kubeconfig ${local_file.kubeconfig.filename} wait --for=condition=Available deployment/aws-load-balancer-controller -n kube-system --timeout=300s
+    EOT
+  }
+
+  depends_on = [module.instances]
+}
+
+module "cluster_addons" {
+  source = "./modules/addons"
+
+  domain            = var.domain
+  enable_ssl        = true
+  enable_argocd     = true
+  enable_monitoring = true
+
+  depends_on = [terraform_data.wait_for_aws_lb_controller]
 }

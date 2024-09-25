@@ -4,13 +4,15 @@ global:
     annotations:
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/tags: Environment=dev,Team=test
-      alb.ingress.kubernetes.io/target-type: 'ip'
+      alb.ingress.kubernetes.io/target-type: 'instance'
+      alb.ingress.kubernetes.io/group.name: bird_alb
+      alb.ingress.kubernetes.io/group.order: "3"
 
 bird:
   enabled: true
   name: bird
   service:
-    type: ClusterIP
+    type: NodePort
     port: 4201
   ingress:
     enabled: true
@@ -19,7 +21,7 @@ bird:
     hosts:
       - host: ""
         paths:
-          - path: /bird
+          - path: /
             pathType: Prefix
     tls: []
 
@@ -27,7 +29,7 @@ birdimage:
   enabled: true
   name: birdimage
   service:
-    type: ClusterIP
+    type: NodePort
     port: 4200
   ingress:
     enabled: true
@@ -36,6 +38,6 @@ birdimage:
     hosts:
       - host: ""
         paths:
-          - path: /birdimage
+          - path: /
             pathType: Prefix
     tls: []

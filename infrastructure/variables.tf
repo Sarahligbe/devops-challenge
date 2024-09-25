@@ -55,3 +55,8 @@ variable "s3_suffix" {
   type = string
   default = "self-managed"
 }
+
+variable "domain" {
+  description = "Domain name"
+  type = string
+}

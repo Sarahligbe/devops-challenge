@@ -1,0 +1,30 @@
+global:
+  domain: "argocd.${domain}"
+configs:
+  secret:
+  #This is bcrypt hashed
+    argocdServerAdminPassword: "${argopass}"
+server:
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: instance
+      alb.ingress.kubernetes.io/load-balancer-name: alb
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: "443"
+      alb.ingress.kubernetes.io/group.name: bird_alb
+      alb.ingress.kubernetes.io/group.order: "2"
+      alb.ingress.kubernetes.io/certificate-arn: "${cert_arn}"
+      alb.ingress.kubernetes.io/backend-protocol: HTTP
+    hostname: "argocd.${domain}"
+    paths:
+      - /
+    pathType: Prefix
+  extraArgs:
+    - --insecure
+  service:
+    type: NodePort
+applicationSet:
+  enabled: true
