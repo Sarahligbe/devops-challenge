@@ -60,3 +60,18 @@ variable "aws_lb_role_arn" {
   description = "aws loadbalancer role arn"
   type = string
 }
+
+variable "argopass" {
+  description = "ArgoCD password"
+  type = string
+}
+
+variable "grafana_passwd" {
+  description = "Grafana password"
+  type = string
+}
+
+variable "cert_arn" {
+  description = "certificate arn"
+  type = string
+}

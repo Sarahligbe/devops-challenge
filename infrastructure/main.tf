@@ -65,6 +65,10 @@ module "instances" {
   ssm_profile_name   = module.iam.ssm_profile_name
   discovery_bucket_name = module.irsa.discovery_bucket_name
   aws_lb_role_arn       = module.iam.aws_lb_role_arn
+  domain            = var.domain
+  argopass          = var.argopass
+  grafana_passwd    = var.grafana_passwd
+  cert_arn          = module.cluster_addons.cert_arn
 
   depends_on         = [module.networking, module.irsa]
 }
@@ -73,10 +77,4 @@ module "cluster_addons" {
   source = "./modules/addons"
 
   domain            = var.domain
-  enable_argocd     = true
-  enable_monitoring = true
-  argopass          = var.argopass
-  grafana_passwd    = var.grafana_passwd
-
-  depends_on = [module.instances]
 }

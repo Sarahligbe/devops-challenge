@@ -26,6 +26,10 @@ CLUSTER_NAME="${cluster_name}"
 AWS_LB_ROLE_ARN="${aws_lb_role_arn}"
 HOSTNAME="$(curl -s http://169.254.169.254/latest/meta-data/local-hostname)"
 INSTANCE_ID="$(curl -s http://169.254.169.254/latest/meta-data/instance-id)"
+GRAFANA_PASSWD="${grafana_passwd}"
+ARGOPASS="${argopass}"
+CERT_ARN="${cert_arn}"
+DOMAIN="${domain}"
 
 log "Starting Kubernetes $NODE_TYPE node setup"
 
@@ -288,7 +292,89 @@ EOF
     helm repo add eks https://aws.github.io/eks-charts
     helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=$CLUSTER_NAME --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller
     
+    kubectl wait --for=condition=Available deployment/aws-load-balancer-controller -n kube-system --timeout=300s
     log "AWS LBC installed successfully"
+
+    log "Installing external dns"
+    curl -o external-dns.yaml https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.0.0/docs/examples/external-dns.yaml
+    sed -i "s/--domain-filter=[^ ]*/--domain-filter=$DOMAIN/" external-dns.yaml
+    kubectl apply -f external-dns.yaml
+
+    log "installing argocd"
+    cat <<EOF > argo_cd_values.yaml
+global:
+  domain: "argocd.$DOMAIN"
+configs:
+  secret:
+  #This is bcrypt hashed
+    argocdServerAdminPassword: "$ARGOPASS"
+server:
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: instance
+      alb.ingress.kubernetes.io/load-balancer-name: alb
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: "443"
+      alb.ingress.kubernetes.io/group.name: bird_alb
+      alb.ingress.kubernetes.io/group.order: "2"
+      alb.ingress.kubernetes.io/certificate-arn: "$CERT_ARN"
+      alb.ingress.kubernetes.io/backend-protocol: HTTP
+    hostname: "argocd.$DOMAIN"
+    paths:
+      - /
+    pathType: Prefix
+  extraArgs:
+    - --insecure
+  service:
+    type: NodePort
+applicationSet:
+  enabled: true
+EOF
+    helm repo add argo https://argoproj.github.io/argo-helm
+    helm install argocd argo/argo-cd --version 7.6.2 --namespace argocd --create-namespace --values argo_cd_values.yaml
+
+    kubectl wait --for=condition=Ready pods --all -n argocd --timeout=300s
+
+    log "Argocd installed successfully"
+
+    log "Installing Prometheus and grafana"
+    cat <<EOF > prometheus_values.yaml
+prometheus:
+  service:
+    type: NodePort
+grafana:
+  adminPassword: "$GRAFANA_PASSWD"
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: instance
+      alb.ingress.kubernetes.io/load-balancer-name: alb
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: "443"
+      alb.ingress.kubernetes.io/group.name: bird_alb
+      alb.ingress.kubernetes.io/group.order: "1"
+      alb.ingress.kubernetes.io/certificate-arn: $CERT_ARN
+      alb.ingress.kubernetes.io/backend-protocol: HTTP
+      alb.ingress.kubernetes.io/healthcheck-path: /login
+    hosts:
+      - "grafana.$DOMAIN"
+    path: /
+    pathType: Prefix
+  service:
+    type: NodePort
+EOF
+
+    helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+    helm install monitoring prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace --values prometheus_values.yaml
+
+    kubectl wait --for=condition=Ready pods --all -n monitoring --timeout=300s
+    log "monitoring stack installed successfully"
+    
 }
 
 # Main execution
@@ -318,6 +404,10 @@ export K8S_VERSION="$K8S_VERSION"
 export CLUSTER_NAME="$CLUSTER_NAME"
 export AWS_LB_ROLE_ARN="$AWS_LB_ROLE_ARN"
 export INSTANCE_ID="$INSTANCE_ID"
+export GRAFANA_PASSWD="$GRAFANA_PASSWD"
+export ARGOPASS="$ARGOPASS"
+export CERT_ARN="$CERT_ARN"
+export DOMAIN="$DOMAIN"
 $(declare -f log setup_worker)
 setup_worker
 EOF

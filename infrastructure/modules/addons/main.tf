@@ -41,31 +41,3 @@ resource "aws_acm_certificate_validation" "main" {
   }
 }
 
-resource "helm_release" "argocd-helm" {
-  count = var.enable_argocd ? 1 : 0
-
-  name = "argo-cd"
-  version = "7.6.0"
-  repository = "https://argoproj.github.io/argo-helm"
-  chart = "argo-cd"
-  timeout = 1000
-  namespace  = "argocd"
-  create_namespace = true
-
-  values = [templatefile("${path.module}/argo_cd_values.yaml", {argopass = "${var.argopass}", domain = "${var.domain}", cert_arn = "${aws_acm_certificate.main.arn}"})]
-}
-
-resource "helm_release" "prometheus" {
-  count = var.enable_monitoring ? 1 : 0
-
-  name       = "prometheus"
-  repository = "https://prometheus-community.github.io/helm-charts"
-  chart      = "kube-prometheus-stack"
-  namespace  = "monitoring"
-  create_namespace = true
-  version = "62.7.0"
-  timeout = 1000
- 
-  values = [templatefile("${path.module}/prometheus_values.yaml", {grafana_passwd = "${var.grafana_passwd}", domain = "${var.domain}", cert_arn = "${aws_acm_certificate.main.arn}" })]
-}
-
