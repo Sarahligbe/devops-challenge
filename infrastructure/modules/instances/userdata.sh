@@ -376,7 +376,7 @@ spec:
             - name: "global.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/ssl-redirect"
               value: "443"
             - name: "global.ingress.annotations.alb\\.ingress\\.kubernetes\\.io/certificate-arn"
-              value: "${CERT_ARN}"
+              value: "$CERT_ARN"
             - name: "bird.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
               value: 'bird.${DOMAIN}'
             - name: "birdimage.ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io/hostname"
