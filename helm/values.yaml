@@ -14,19 +14,19 @@ bird:
     hosts:
       - host: ""
         paths:
-          - path: /
-            pathType: Exact
+          - path: /bird
+            pathType: Prefix
     tls: []
 
 birdimage:
-  enabled: false
+  enabled: true
   ingress:
     enabled: true
-    className: ""
+    className: "alb"
     annotations: {}
     hosts:
       - host: ""
         paths:
-          - path: /
+          - path: /birdimage
             pathType: Prefix
     tls: []
