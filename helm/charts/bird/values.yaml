@@ -7,7 +7,7 @@ name: bird
 image:
   repository: sayaligbe/bird
   pullPolicy: Always
-  tag: "v1.0.0"
+  tag: "v1.0.1"
 
 nameOverride: ""
 fullnameOverride: ""
@@ -45,4 +45,4 @@ securityContext:
 
 env:
   - name: BIRDIMAGE_URL
-    value: "http://birdimage.birdapp.svc.cluster.local:4200"
+    value: "http://birdimage-svc.helm.svc.cluster.local:4200"
